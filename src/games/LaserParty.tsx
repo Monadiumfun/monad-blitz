@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
@@ -20,10 +20,22 @@ const GRID_OPTIONS = [
 ]
 
 const HOUSE_EDGE = 0.96
-const MAX_GRID_PX = 340
+const GRID_CAP_PX = 340
 const GAP = 4
 
+// Largest grid that fits the current viewport (mini-app window) minus padding.
+function fitGridPx(): number {
+  const w = typeof window !== 'undefined' ? window.innerWidth : 360
+  return Math.min(GRID_CAP_PX, w - 28)
+}
+
 function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
+  const [maxGridPx, setMaxGridPx] = useState(fitGridPx)
+  useEffect(() => {
+    const onResize = () => setMaxGridPx(fitGridPx())
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   const [phase, setPhase] = useState<Phase>('setup')
   const [wager, setWager] = useState(() => clampWager(WAGER_DEFAULT, blitzBalance))
   const [gridSize, setGridSize] = useState(5)
@@ -61,8 +73,8 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
 
   const cellSize = useMemo(() => {
     const maxDim = Math.max(aliveRows.length, aliveCols.length, 1)
-    return Math.min(Math.floor((MAX_GRID_PX - (maxDim - 1) * GAP) / maxDim), 72)
-  }, [aliveRows.length, aliveCols.length])
+    return Math.min(Math.floor((maxGridPx - (maxDim - 1) * GAP) / maxDim), 72)
+  }, [aliveRows.length, aliveCols.length, maxGridPx])
 
   const reset = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
