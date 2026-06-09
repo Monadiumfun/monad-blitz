@@ -44,7 +44,7 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
 
   function share() {
     hapticTap();
-    const text = `Play BlitzGames on Monad with me 🎮 — use my code "${user.refCode}" or just tap:`;
+    const text = `Play Blitz on Monad with me 🎮 — use my code "${user.refCode}" or just tap:`;
     const url = `https://t.me/share/url?url=${encodeURIComponent(user.referralLink)}&text=${encodeURIComponent(text)}`;
     openTelegramLink(url);
   }
@@ -65,7 +65,7 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
         <header className="flex items-center justify-between">
           <div className="flex flex-col">
             <h1 className="text-2xl text-white brand leading-none">
-              Blitz<span className="text-[#a2e634]">Games</span>
+              Blitz
             </h1>
             <span className="text-xs text-gray-500 mt-1">@{user.username}</span>
           </div>
