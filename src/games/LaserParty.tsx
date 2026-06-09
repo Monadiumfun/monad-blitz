@@ -3,6 +3,7 @@ import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds
 import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
+import SharePnL from '../components/SharePnL'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 
 interface LaserPartyProps {
@@ -259,6 +260,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
             </span>
           </div>
           <div className="flex flex-col gap-2.5 w-full mt-2">
+            <SharePnL game="Laser Party" emoji="🔫" multiplier={multiplier} wager={wager} />
             <button onClick={reset} className="w-full py-3 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97]">
               Play Again
             </button>

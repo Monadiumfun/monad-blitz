@@ -5,6 +5,7 @@ import { sfxCorrect, sfxWrong, sfxTap, sfxBust, sfxCashout } from '../lib/sounds
 import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
+import SharePnL from '../components/SharePnL'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 import type { Entity } from '../types'
 
@@ -302,6 +303,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
                 </span>
               </div>
               <div className="flex flex-col gap-2.5 w-full mt-2">
+                {won && <SharePnL game="Higher or Lower" emoji="⚡" multiplier={finalMultiplier} wager={wager} />}
                 <button
                   onClick={() => setPhase('setup')}
                   className="w-full py-3.5 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97]"
