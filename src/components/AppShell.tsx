@@ -20,10 +20,11 @@ interface Props {
   referralLink: string;
   drawer: boolean;
   setDrawer: (v: boolean) => void;
+  onRewards: () => void;
   children: ReactNode;
 }
 
-function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, drawer, setDrawer, children }: Props) {
+function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, drawer, setDrawer, onRewards, children }: Props) {
 
   function shareRef() {
     hapticTap();
@@ -35,9 +36,14 @@ function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink
     <div className="min-h-[100dvh] bg-[#0a0a0f]">
       {/* top bar */}
       <header className="fixed top-0 inset-x-0 z-30 h-14 flex items-center justify-between px-4 border-b border-[#1a1a24] bg-[#0a0a0f]/90 backdrop-blur">
-        <button onClick={() => { hapticTap(); setDrawer(true); }} aria-label="Menu" className="p-1.5 -ml-1.5 text-[#8898a8] active:scale-90 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-        </button>
+        <div className="flex items-center gap-1">
+          <button onClick={() => { hapticTap(); setDrawer(true); }} aria-label="Menu" className="p-1.5 -ml-1.5 text-[#8898a8] active:scale-90 transition">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+          </button>
+          <button onClick={() => { hapticTap(); onRewards(); }} aria-label="Rewards" className="p-1.5 text-lg leading-none active:scale-90 transition">
+            🎁
+          </button>
+        </div>
         <span className="brand flex items-center gap-1.5 text-lg text-white absolute left-1/2 -translate-x-1/2">
           <BlitzLogo className="h-[0.9em] w-auto text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 6px rgba(110,84,255,0.6))" }} />
           Blitz

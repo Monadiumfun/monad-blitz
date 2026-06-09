@@ -4,6 +4,7 @@ import BlitzLogo from "./components/BlitzLogo";
 import ChainFeed from "./components/ChainFeed";
 import Leaderboard from "./components/Leaderboard";
 import Settings from "./components/Settings";
+import Rewards from "./components/Rewards";
 import Onboarding from "./onboarding/Onboarding";
 import HigherLower from "./games/HigherLower";
 import LaserParty from "./games/LaserParty";
@@ -21,6 +22,7 @@ function App() {
   const [tab, setTab] = useState<Tab>("play");
   const [currentGame, setCurrentGame] = useState<GameId>("laser-party");
   const [drawer, setDrawer] = useState(false);
+  const [showRewards, setShowRewards] = useState(false);
 
   useEffect(() => {
     initTelegram();
@@ -101,22 +103,28 @@ function App() {
     currentGame === "laser-party" ? <LaserParty onBack={openDrawer} blitzBalance={blitzBalance} /> :
     <DeathRun onBack={openDrawer} blitzBalance={blitzBalance} />;
 
-  const content =
-    tab === "leaderboard" ? <Leaderboard onBack={() => setTab("play")} user={user} /> :
-    tab === "history" ? <Settings user={user} onBack={() => setTab("play")} /> :
-    game;
+  const content = showRewards ? (
+    <Rewards onBack={() => setShowRewards(false)} onLeaderboard={() => { setShowRewards(false); setTab("leaderboard"); }} />
+  ) : tab === "leaderboard" ? (
+    <Leaderboard onBack={() => setTab("play")} user={user} />
+  ) : tab === "history" ? (
+    <Settings user={user} onBack={() => setTab("play")} />
+  ) : (
+    game
+  );
 
   return (
     <UserContext.Provider value={user}>
       <AppShell
         tab={tab}
-        onTab={setTab}
+        onTab={(t) => { setShowRewards(false); setTab(t); }}
         currentGame={currentGame}
-        onSelectGame={(g) => setCurrentGame(g)}
+        onSelectGame={(g) => { setShowRewards(false); setCurrentGame(g); }}
         refCode={user.refCode}
         referralLink={user.referralLink}
         drawer={drawer}
         setDrawer={setDrawer}
+        onRewards={() => setShowRewards(true)}
       >
         {content}
       </AppShell>
