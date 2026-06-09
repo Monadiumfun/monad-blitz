@@ -4,6 +4,7 @@ import BlitzLogo from "./components/BlitzLogo";
 import ChainFeed from "./components/ChainFeed";
 import Leaderboard from "./components/Leaderboard";
 import Settings from "./components/Settings";
+import Rewards from "./components/Rewards";
 import Onboarding from "./onboarding/Onboarding";
 import HigherLower from "./games/HigherLower";
 import LaserParty from "./games/LaserParty";
@@ -21,6 +22,8 @@ function App() {
   const [tab, setTab] = useState<Tab>("play");
   const [currentGame, setCurrentGame] = useState<GameId>("laser-party");
   const [drawer, setDrawer] = useState(false);
+  const [showRewards, setShowRewards] = useState(false);
+  const [showReferral, setShowReferral] = useState(false);
 
   useEffect(() => {
     initTelegram();
@@ -101,22 +104,39 @@ function App() {
     currentGame === "laser-party" ? <LaserParty onBack={openDrawer} blitzBalance={blitzBalance} /> :
     <DeathRun onBack={openDrawer} blitzBalance={blitzBalance} />;
 
-  const content =
-    tab === "leaderboard" ? <Leaderboard onBack={() => setTab("play")} user={user} /> :
-    tab === "history" ? <Settings user={user} onBack={() => setTab("play")} /> :
-    game;
+  const clearOverlays = () => { setShowRewards(false); setShowReferral(false); };
+  const balanceLabel = Math.floor(blitzBalance).toLocaleString("en-US");
+
+  const content = showRewards ? (
+    <Rewards
+      onBack={() => setShowRewards(false)}
+      onLeaderboard={() => { setShowRewards(false); setTab("leaderboard"); }}
+      onReferral={() => { setShowRewards(false); setShowReferral(true); }}
+    />
+  ) : showReferral ? (
+    <Leaderboard type="referral" user={user} onBack={() => setShowReferral(false)} />
+  ) : tab === "leaderboard" ? (
+    <Leaderboard type="pnl" user={user} onBack={() => setTab("play")} />
+  ) : tab === "history" ? (
+    <Settings user={user} onBack={() => setTab("play")} />
+  ) : (
+    game
+  );
 
   return (
     <UserContext.Provider value={user}>
       <AppShell
         tab={tab}
-        onTab={setTab}
+        onTab={(t) => { clearOverlays(); setTab(t); }}
         currentGame={currentGame}
-        onSelectGame={(g) => setCurrentGame(g)}
+        onSelectGame={(g) => { clearOverlays(); setCurrentGame(g); }}
         refCode={user.refCode}
         referralLink={user.referralLink}
         drawer={drawer}
         setDrawer={setDrawer}
+        onRewards={() => { setShowReferral(false); setShowRewards(true); }}
+        onReferralLeaderboard={() => { setShowRewards(false); setShowReferral(true); }}
+        balance={balanceLabel}
       >
         {content}
       </AppShell>
@@ -127,7 +147,7 @@ function App() {
 
 function Splash({ children }: { children?: ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center justify-center gap-4">
+    <div className="min-h-[var(--tg-vh,100dvh)] bg-[#0a0a0f] flex flex-col items-center justify-center gap-4">
       <h1 className="text-3xl text-white brand flex items-center justify-center gap-1.5">
         <BlitzLogo className="h-[0.82em] w-auto shrink-0 text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 8px rgba(110,84,255,0.6))" }} />
         Blitz
