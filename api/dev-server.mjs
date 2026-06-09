@@ -5,8 +5,10 @@ import { createServer } from "node:http";
 
 const PORT = Number(process.env.API_PORT || 3001);
 
-// Allow unauthenticated browser testing outside Telegram during local dev.
-process.env.ALLOW_DEV_AUTH = process.env.ALLOW_DEV_AUTH || "1";
+// Browser testing outside Telegram is opt-in and gated by a secret: set both
+// DEV_AUTH_SECRET (this server) and VITE_DEV_AUTH_SECRET (the frontend) to the
+// same value in your local .env. Never set DEV_AUTH_SECRET in a deployed env —
+// it would let anyone impersonate any account via the x-dev-user header.
 
 const routes = {
   "/api/me": () => import("./me.ts"),
@@ -45,5 +47,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`[api] dev server on http://localhost:${PORT}  (ALLOW_DEV_AUTH=${process.env.ALLOW_DEV_AUTH})`);
+  console.log(`[api] dev server on http://localhost:${PORT}  (dev-auth ${process.env.DEV_AUTH_SECRET ? "ON via secret" : "OFF"})`);
 });
