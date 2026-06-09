@@ -354,16 +354,55 @@ export const entities: Entity[] = [
   { name: 'Tfue', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 11.3, emoji: '🎯' },
   { name: 'Shroud', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 11, emoji: '🔫' },
   { name: 'Pokimane', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 9.4, emoji: '🎀', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Pokimane_at_the_Creator_Economy_Caucus_launch%2C_2025_%28cropped%29_3.jpg/250px-Pokimane_at_the_Creator_Economy_Caucus_launch%2C_2025_%28cropped%29_3.jpg' },
+
+  // ============================================================
+  // SPICY - Hall of Shame (global fame score, 0-100)
+  // ============================================================
+  { name: 'Donald Trump', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 100, emoji: '🇺🇸', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Official_Presidential_Portrait_of_President_Donald_J._Trump_%282025%29_%28cropped%29%282%29.jpg/250px-Official_Presidential_Portrait_of_President_Donald_J._Trump_%282025%29_%28cropped%29%282%29.jpg' },
+  { name: 'Kanye West', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 96, emoji: '🎤', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Kanye_West_at_the_2009_Tribeca_Film_Festival_%28crop_2%29.jpg/250px-Kanye_West_at_the_2009_Tribeca_Film_Festival_%28crop_2%29.jpg' },
+  { name: 'P. Diddy', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 94, emoji: '🍼', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Sean_Combs_Cannes_2012_%28cropped%29_4.jpg/250px-Sean_Combs_Cannes_2012_%28cropped%29_4.jpg' },
+  { name: 'Jeffrey Epstein', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 92, emoji: '🏝', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Jeffrey_Epstein_mug_shot_%28cropped%29.jpg/250px-Jeffrey_Epstein_mug_shot_%28cropped%29.jpg' },
+  { name: 'Andrew Tate', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 90, emoji: '🥃', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Andrew_Tate_-_James_Tamim_Upload_%28Cropped_Wide_Portrait%29.png/250px-Andrew_Tate_-_James_Tamim_Upload_%28Cropped_Wide_Portrait%29.png' },
+  { name: 'Mia Khalifa', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 88, emoji: '🔞', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Mia_Khalifa_in_2019.png/250px-Mia_Khalifa_in_2019.png' },
+  { name: 'El Chapo', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 85, emoji: '⛏', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Booking_photo_of_Joaquin_%E2%80%9CEl_Chapo%E2%80%9C_Guzman_%28front%29.jpg/250px-Booking_photo_of_Joaquin_%E2%80%9CEl_Chapo%E2%80%9C_Guzman_%28front%29.jpg' },
+  { name: 'Logan Paul', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 84, emoji: '🥊', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Logan_Paul_RR25_%28cropped%29.jpg/250px-Logan_Paul_RR25_%28cropped%29.jpg' },
+  { name: 'Hawk Tuah Girl', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 80, emoji: '🦅', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Haliey_Welch_at_DreamHack_Atlanta_2024.jpg/250px-Haliey_Welch_at_DreamHack_Atlanta_2024.jpg' },
+  { name: 'Lana Rhoades', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 78, emoji: '🔞', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Lana_Rhoades_2-2017_%28cropped%29.jpg/250px-Lana_Rhoades_2-2017_%28cropped%29.jpg' },
+  { name: 'Sam Bankman-Fried', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 76, emoji: '🪙', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Sam_Bankman-Fried_%28cropped%29.png/250px-Sam_Bankman-Fried_%28cropped%29.png' },
+  { name: 'Bonnie Blue', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 74, emoji: '🔞', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Bonnie_Blue%2C_July_2025_%28cropped%29.jpg/250px-Bonnie_Blue%2C_July_2025_%28cropped%29.jpg' },
+  { name: 'R. Kelly', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 72, emoji: '🎙', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/R._Kelly_in_2017.png/250px-R._Kelly_in_2017.png' },
+  { name: 'Sophie Rain', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 70, emoji: '🔞' },
+  { name: 'Jordan Belfort', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 68, emoji: '🐺', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/JordanBelfort2017.png/250px-JordanBelfort2017.png' },
+  { name: 'Bernie Madoff', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 66, emoji: '💸', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Bernard_Madoff_2009_mug_shot_%283x4_cropped%29.jpg/250px-Bernard_Madoff_2009_mug_shot_%283x4_cropped%29.jpg' },
+  { name: 'Nicolas Sarkozy', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 65, emoji: '🇫🇷', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Nicolas_Sarkozy_in_2010.jpg/250px-Nicolas_Sarkozy_in_2010.jpg' },
+  { name: 'Belle Delphine', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 62, emoji: '🛁', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Belle_Delphine_-_2020-b_%28cropped%29.png/250px-Belle_Delphine_-_2020-b_%28cropped%29.png' },
+  { name: 'Elizabeth Holmes', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 60, emoji: '🩸', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Elizabeth_Holmes_2014_cropped.jpg/250px-Elizabeth_Holmes_2014_cropped.jpg' },
+  { name: 'Bhad Bhabie', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 58, emoji: '😤', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Bhad_Bhabie_passport.jpg/250px-Bhad_Bhabie_passport.jpg' },
+  { name: 'Ghislaine Maxwell', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 56, emoji: '🏝', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Ghislaine_Maxwell_MDC_mug_shot.webp/250px-Ghislaine_Maxwell_MDC_mug_shot.webp.png' },
+  { name: 'Anna Delvey', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 52, emoji: '👜', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/AnnaDelvey-byPhilipRomano.jpg/250px-AnnaDelvey-byPhilipRomano.jpg' },
+  { name: 'CZ (Binance)', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 50, emoji: '🟡', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Changpeng_Zhao_in_2022.jpg/250px-Changpeng_Zhao_in_2022.jpg' },
+  { name: 'Lily Phillips', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 48, emoji: '🔞' },
+  { name: 'Do Kwon', category: 'spicy', metric: 'fame', metricLabel: 'Fame Score', value: 40, emoji: '🌙', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Do_Kwon.png/250px-Do_Kwon.png' },
 ]
+
+const GEO_REDRAW_CHANCE = 0.65
 
 export function getRandomPair(sameCategoryOnly = true): [Entity, Entity] {
   const pool = [...entities]
-  const first = pool[Math.floor(Math.random() * pool.length)]
+  let first = pool[Math.floor(Math.random() * pool.length)]
+  if (first.category === 'geo' && Math.random() < GEO_REDRAW_CHANCE) {
+    first = pool[Math.floor(Math.random() * pool.length)]
+  }
   const candidates = sameCategoryOnly
     ? pool.filter(e => e.metric === first.metric && e.name !== first.name)
     : pool.filter(e => e.name !== first.name || e.metric !== first.metric)
   const second = candidates[Math.floor(Math.random() * candidates.length)]
   return [first, second]
+}
+
+export function getNextEntity(current: Entity): Entity {
+  const candidates = entities.filter(e => e.metric === current.metric && e.name !== current.name)
+  return candidates[Math.floor(Math.random() * candidates.length)]
 }
 
 export const categoryLabels: Record<string, string> = {
@@ -374,4 +413,5 @@ export const categoryLabels: Record<string, string> = {
   tech: 'Tech',
   food: 'Food & Brands',
   monad: 'Blockchain',
+  spicy: 'Hall of Shame',
 }

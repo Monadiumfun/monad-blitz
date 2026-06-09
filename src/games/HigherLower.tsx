@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { getRandomPair, categoryLabels } from '../data/entities'
+import { getRandomPair, getNextEntity, categoryLabels } from '../data/entities'
 import { getEntityImage } from '../data/images'
 import { sfxCorrect, sfxWrong, sfxTap, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
@@ -29,6 +29,22 @@ const categoryColors: Record<string, string> = {
   sports: '#ff6b35',
   tech: '#00d4ff',
   food: '#ffb347',
+  spicy: '#ff2d55',
+}
+
+function CardImage({ entity }: { entity: Entity }) {
+  const [failed, setFailed] = useState(false)
+  const img = entity.image ?? getEntityImage(entity.name, entity.category)
+  if (!img || failed) return <span className="text-5xl leading-none">{entity.emoji}</span>
+  return (
+    <img
+      src={img}
+      alt={entity.name}
+      className="w-16 h-16 rounded-xl object-cover"
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  )
 }
 
 function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
@@ -103,9 +119,9 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
         finishBatch(newCorrect)
         return
       }
-      const [, next] = getRandomPair(true)
-      setLeftCard(side === 'left' ? leftCard : rightCard)
-      setRightCard(next)
+      const kept = side === 'left' ? leftCard : rightCard
+      setLeftCard(kept)
+      setRightCard(getNextEntity(kept))
       setRound(nextRound)
       setPhase('playing')
       setPicked(null)
@@ -146,14 +162,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
               : 'none',
         }}
       >
-        {(() => {
-          const img = getEntityImage(entity.name, entity.category)
-          return img ? (
-            <img src={img} alt={entity.name} className="w-16 h-16 rounded-xl object-cover" loading="lazy" />
-          ) : (
-            <span className="text-5xl leading-none">{entity.emoji}</span>
-          )
-        })()}
+        <CardImage key={`${entity.name}-${entity.metric}`} entity={entity} />
         <span className="text-base font-bold text-white text-center leading-tight">{entity.name}</span>
         <span
           className="text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full"
