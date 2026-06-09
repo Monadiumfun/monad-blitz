@@ -4,6 +4,7 @@ import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
 import SharePnL from '../components/SharePnL'
+import BlitzLogo from '../components/BlitzLogo'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 
 interface LaserPartyProps {
@@ -399,12 +400,13 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
                   >
                     {isPlayer && (
                       <div className="w-full h-full flex items-center justify-center">
-                        <div
-                          className="rounded-full bg-[#6E54FF]"
+                        <BlitzLogo
+                          className="text-[#6E54FF]"
                           style={{
-                            width: cellSize * 0.35,
-                            height: cellSize * 0.35,
-                            transition: 'width 0.5s ease, height 0.5s ease',
+                            height: cellSize * 0.58,
+                            width: 'auto',
+                            transition: 'height 0.5s ease',
+                            filter: 'drop-shadow(0 0 6px rgba(110, 84, 255, 0.7))',
                           }}
                         />
                       </div>
