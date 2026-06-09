@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import GameHub from "./components/GameHub";
+import BlitzLogo from "./components/BlitzLogo";
 import ChainFeed from "./components/ChainFeed";
 import Leaderboard from "./components/Leaderboard";
 import Onboarding from "./onboarding/Onboarding";
@@ -108,7 +109,8 @@ function App() {
 function Splash({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center justify-center gap-4">
-      <h1 className="text-3xl text-white brand animate-pulse">
+      <h1 className="text-3xl text-white brand animate-pulse flex items-center justify-center gap-1.5">
+        <BlitzLogo className="h-[0.82em] w-auto shrink-0 text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 8px rgba(110,84,255,0.6))" }} />
         Blitz
       </h1>
       {children}
