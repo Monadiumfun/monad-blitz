@@ -63,11 +63,11 @@ function Leaderboard({ onBack, user, type = "referral" }: Props) {
           <div className="w-[44px]" />
         </header>
 
-        {isPnl && (
-          <div className="rounded-2xl border border-[#6E54FF]/40 bg-gradient-to-br from-[#6E54FF]/[0.12] to-transparent p-4 text-center">
-            <p className="text-sm font-bold text-white">🎁 Top PnL Maker wins the 500 $MON prize pool</p>
-          </div>
-        )}
+        <div className="rounded-2xl border border-[#6E54FF]/40 bg-gradient-to-br from-[#6E54FF]/[0.12] to-transparent p-4 text-center">
+          <p className="text-sm font-bold text-white">
+            {isPnl ? "🎁 Top PnL Maker wins the 500 $MON prize pool" : "🎁 Top 3 referrers win the 500 $MON prize pool"}
+          </p>
+        </div>
 
         {!isPnl && user && <InviteCard refCode={user.refCode} referralLink={user.referralLink} />}
 

@@ -108,7 +108,11 @@ function App() {
   const balanceLabel = Math.floor(blitzBalance).toLocaleString("en-US");
 
   const content = showRewards ? (
-    <Rewards onBack={() => setShowRewards(false)} onLeaderboard={() => { setShowRewards(false); setTab("leaderboard"); }} />
+    <Rewards
+      onBack={() => setShowRewards(false)}
+      onLeaderboard={() => { setShowRewards(false); setTab("leaderboard"); }}
+      onReferral={() => { setShowRewards(false); setShowReferral(true); }}
+    />
   ) : showReferral ? (
     <Leaderboard type="referral" user={user} onBack={() => setShowReferral(false)} />
   ) : tab === "leaderboard" ? (

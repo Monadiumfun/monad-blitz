@@ -1,10 +1,26 @@
 interface Props {
   onBack: () => void;
   onLeaderboard: () => void;
+  onReferral: () => void;
 }
 
-/** Rewards page — the seasonal PnL prize pool. */
-function Rewards({ onBack, onLeaderboard }: Props) {
+function PoolCard({ emoji, title, desc, cta, onClick }: { emoji: string; title: string; desc: string; cta: string; onClick: () => void }) {
+  return (
+    <div className="rounded-2xl border border-[#6E54FF]/40 bg-gradient-to-br from-[#6E54FF]/[0.12] to-transparent p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-bold text-white">{emoji} {title}</span>
+        <span className="brand text-base" style={{ color: "#6E54FF", textShadow: "0 0 12px rgba(110,84,255,0.5)" }}>500 $MON</span>
+      </div>
+      <p className="text-xs text-[#8898a8] leading-relaxed">{desc}</p>
+      <button onClick={onClick} className="w-full rounded-xl bg-[#6E54FF] py-2.5 text-sm font-bold text-white active:scale-[0.98] transition">
+        {cta}
+      </button>
+    </div>
+  );
+}
+
+/** Rewards page — the seasonal prize pools (PnL + referrals). */
+function Rewards({ onBack, onLeaderboard, onReferral }: Props) {
   return (
     <div className="min-h-full bg-[#0a0a0f] flex flex-col items-center px-4 py-6">
       <div className="w-full max-w-[420px] flex flex-col gap-6">
@@ -20,32 +36,23 @@ function Rewards({ onBack, onLeaderboard }: Props) {
         <div className="text-center mt-2">
           <span className="text-5xl">🎁</span>
           <h1 className="brand text-3xl text-white mt-3">Rewards</h1>
+          <p className="text-sm text-[#8898a8] mt-2">Two 500 $MON prize pools this season</p>
         </div>
 
-        {/* prize pool hero */}
-        <div className="rounded-2xl border border-[#6E54FF]/40 bg-gradient-to-br from-[#6E54FF]/[0.15] to-transparent p-6 text-center">
-          <div className="text-[11px] uppercase tracking-[0.2em] text-[#8898a8]">Prize pool</div>
-          <div
-            className="brand text-5xl mt-2"
-            style={{ color: "#6E54FF", textShadow: "0 0 18px rgba(110,84,255,0.6)" }}
-          >
-            500 $MON
-          </div>
-        </div>
-
-        <p className="text-center text-lg font-bold text-white leading-snug">
-          The best PnL Maker gets the 500 $MON prize pool
-        </p>
-        <p className="text-center text-sm text-[#8898a8] leading-relaxed">
-          Stack the biggest profit across all games this season. Climb the PnL leaderboard and claim your share of the pool.
-        </p>
-
-        <button
+        <PoolCard
+          emoji="💰"
+          title="Best PnL Maker"
+          desc="Stack the biggest net profit across all games to win the pool."
+          cta="PnL leaderboard 🏆"
           onClick={onLeaderboard}
-          className="w-full rounded-xl bg-[#6E54FF] py-3.5 text-sm font-bold text-white active:scale-[0.98] transition"
-        >
-          View leaderboard 🏆
-        </button>
+        />
+        <PoolCard
+          emoji="🤝"
+          title="Top 3 referrers"
+          desc="Invite the most friends — the top 3 referrers share the pool."
+          cta="Referral leaderboard 👥"
+          onClick={onReferral}
+        />
       </div>
     </div>
   );
