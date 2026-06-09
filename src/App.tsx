@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import GameHub from "./components/GameHub";
 import Leaderboard from "./components/Leaderboard";
+import Settings from "./components/Settings";
 import Onboarding from "./onboarding/Onboarding";
 import HigherLower from "./games/HigherLower";
 import LaserParty from "./games/LaserParty";
@@ -9,7 +10,7 @@ import type { GameId } from "./types";
 import { api, type ApiUser } from "./lib/api";
 import { initTelegram } from "./lib/telegram";
 
-type Screen = { name: "hub" } | { name: "game"; game: GameId } | { name: "leaderboard" };
+type Screen = { name: "hub" } | { name: "game"; game: GameId } | { name: "leaderboard" } | { name: "settings" };
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -80,6 +81,8 @@ function App() {
 
   if (screen.name === "leaderboard") return <Leaderboard onBack={backToHub} />;
 
+  if (screen.name === "settings") return <Settings user={user} onBack={backToHub} />;
+
   if (screen.name === "game") {
     if (screen.game === "higher-lower") return <HigherLower onBack={backToHub} />;
     if (screen.game === "laser-party") return <LaserParty onBack={backToHub} />;
@@ -91,6 +94,7 @@ function App() {
       user={user}
       onSelectGame={(game) => setScreen({ name: "game", game })}
       onOpenLeaderboard={() => setScreen({ name: "leaderboard" })}
+      onOpenSettings={() => setScreen({ name: "settings" })}
     />
   );
 }
