@@ -1,15 +1,16 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { sfxTap, sfxCorrect, sfxBust, sfxCashout } from '../lib/sounds'
+import { sfxTap, sfxCorrect, sfxBust, sfxCashout, sfxSuspense } from '../lib/sounds'
 
 interface DeathRunProps {
   onBack: () => void
 }
 
-type GameState = 'setup' | 'playing' | 'cashout' | 'bust'
+type GameState = 'setup' | 'playing' | 'suspense' | 'cashout' | 'bust'
 type TilesPerRow = 2 | 3 | 4
 
 const FEE_FACTOR = 0.96
 const PREVIEW_ROWS = 3
+const SUSPENSE_MS = 650
 
 function rowMultiplier(tilesPerRow: TilesPerRow): number {
   return (1 / (1 - 1 / tilesPerRow)) * FEE_FACTOR
@@ -32,10 +33,12 @@ function DeathRun({ onBack }: DeathRunProps) {
   const [currentRow, setCurrentRow] = useState(0)
   const [mines, setMines] = useState<number[]>([])
   const [picks, setPicks] = useState<number[]>([])
+  const [suspenseTile, setSuspenseTile] = useState<number>(-1)
   const currentRowRef = useRef<HTMLDivElement | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    if (gameState === 'playing' && currentRowRef.current) {
+    if ((gameState === 'playing' || gameState === 'suspense') && currentRowRef.current) {
       currentRowRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [currentRow, gameState])
@@ -60,6 +63,7 @@ function DeathRun({ onBack }: DeathRunProps) {
     setMines(initial)
     setCurrentRow(0)
     setPicks([])
+    setSuspenseTile(-1)
     setGameState('playing')
   }, [])
 
@@ -67,20 +71,28 @@ function DeathRun({ onBack }: DeathRunProps) {
     if (gameState !== 'playing' || rowIndex !== currentRow) return
 
     sfxTap()
+    sfxSuspense()
+    setSuspenseTile(tileIndex)
+    setGameState('suspense')
 
-    if (mines[rowIndex] === tileIndex) {
-      sfxBust()
-      setPicks(p => [...p, tileIndex])
-      setGameState('bust')
-      return
-    }
+    timerRef.current = setTimeout(() => {
+      setSuspenseTile(-1)
 
-    sfxCorrect()
-    const newPicks = [...picks, tileIndex]
-    setPicks(newPicks)
-    const nextRow = currentRow + 1
-    setCurrentRow(nextRow)
-    setMines(prev => ensureMines(nextRow + PREVIEW_ROWS, tilesPerRow, prev))
+      if (mines[rowIndex] === tileIndex) {
+        sfxBust()
+        setPicks(p => [...p, tileIndex])
+        setGameState('bust')
+        return
+      }
+
+      sfxCorrect()
+      const newPicks = [...picks, tileIndex]
+      setPicks(newPicks)
+      const nextRow = currentRow + 1
+      setCurrentRow(nextRow)
+      setMines(prev => ensureMines(nextRow + PREVIEW_ROWS, tilesPerRow, prev))
+      setGameState('playing')
+    }, SUSPENSE_MS)
   }, [gameState, currentRow, mines, picks, tilesPerRow, ensureMines])
 
   const handleCashOut = useCallback(() => {
@@ -91,6 +103,7 @@ function DeathRun({ onBack }: DeathRunProps) {
   }, [gameState, picks.length])
 
   const handlePlayAgain = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
     const initial: number[] = []
     for (let i = 0; i < PREVIEW_ROWS + 1; i++) {
       initial.push(Math.floor(Math.random() * tilesPerRow))
@@ -98,6 +111,7 @@ function DeathRun({ onBack }: DeathRunProps) {
     setMines(initial)
     setCurrentRow(0)
     setPicks([])
+    setSuspenseTile(-1)
     setGameState('playing')
   }, [tilesPerRow])
 
@@ -150,6 +164,7 @@ function DeathRun({ onBack }: DeathRunProps) {
 
   const showMines = gameState === 'bust'
   const totalVisible = currentRow + PREVIEW_ROWS + 1
+  const isPlaying = gameState === 'playing' || gameState === 'suspense'
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
@@ -175,11 +190,12 @@ function DeathRun({ onBack }: DeathRunProps) {
 
         <div className="flex-1 flex flex-col-reverse gap-1.5 py-2 overflow-y-auto max-h-[calc(100dvh-180px)]">
           {Array.from({ length: totalVisible }, (_, rowIndex) => {
-            const isCurrentRow = rowIndex === currentRow && gameState === 'playing'
+            const isCurrentRow = rowIndex === currentRow && isPlaying
             const isCompletedRow = rowIndex < picks.length
-            const isFutureRow = rowIndex > currentRow || (rowIndex === currentRow && gameState !== 'playing')
+            const isFutureRow = rowIndex > currentRow || (rowIndex === currentRow && !isPlaying)
             const isBustRow = gameState === 'bust' && rowIndex === picks.length - 1
             const rowMultValue = cumulativeMultiplier(tilesPerRow, rowIndex + 1)
+            const isSuspenseRow = gameState === 'suspense' && rowIndex === currentRow
 
             return (
               <div
@@ -190,8 +206,11 @@ function DeathRun({ onBack }: DeathRunProps) {
                 }`}
               >
                 <div className="w-8 flex justify-center shrink-0">
-                  {isCurrentRow && (
+                  {isCurrentRow && !isSuspenseRow && (
                     <div className="w-2 h-2 rounded-full bg-[#a2e634] animate-pulse-green" />
+                  )}
+                  {isSuspenseRow && (
+                    <span className="text-sm animate-shake">...</span>
                   )}
                   {isCompletedRow && !isBustRow && (
                     <span className="text-[10px] font-mono text-[#6b7280]">{rowMultValue.toFixed(1)}x</span>
@@ -204,6 +223,7 @@ function DeathRun({ onBack }: DeathRunProps) {
                     const isMine = mines[rowIndex] === tileIndex
                     const isDeathPick = isBustRow && isPicked && isMine
                     const isRevealedMine = showMines && isMine && !isDeathPick && isCompletedRow
+                    const isSuspenseTile = isSuspenseRow && tileIndex === suspenseTile
 
                     let tileClass = 'bg-[#1a1a2e] border-[#2a2a3a]'
                     let content: React.ReactNode = null
@@ -211,6 +231,8 @@ function DeathRun({ onBack }: DeathRunProps) {
                     if (isDeathPick) {
                       tileClass = 'bg-[#e74c3c] border-[#e74c3c] animate-shake'
                       content = <span className="text-xl">💀</span>
+                    } else if (isSuspenseTile) {
+                      tileClass = 'bg-[#ffb34730] border-[#ffb347]'
                     } else if (isPicked) {
                       tileClass = 'bg-[#a2e634]/20 border-[#a2e634]'
                       content = (
@@ -221,7 +243,7 @@ function DeathRun({ onBack }: DeathRunProps) {
                     } else if (isRevealedMine) {
                       tileClass = 'bg-[#e74c3c]/20 border-[#e74c3c]/50'
                       content = <span className="text-sm opacity-60">💀</span>
-                    } else if (isCurrentRow) {
+                    } else if (isCurrentRow && gameState === 'playing') {
                       tileClass = 'bg-[#1a1a2e] border-[#3a3a5a] hover:bg-[#2a2a4e] hover:border-[#a2e634]/50 cursor-pointer active:scale-95'
                     }
 
@@ -229,8 +251,12 @@ function DeathRun({ onBack }: DeathRunProps) {
                       <button
                         key={tileIndex}
                         onClick={() => handleTilePick(rowIndex, tileIndex)}
-                        disabled={!isCurrentRow}
+                        disabled={gameState !== 'playing' || !isCurrentRow}
                         className={`flex-1 h-[52px] rounded-xl border flex items-center justify-center transition-all duration-150 ${tileClass}`}
+                        style={isSuspenseTile ? {
+                          animation: 'shake 0.15s ease-in-out infinite',
+                          boxShadow: '0 0 16px rgba(255, 179, 71, 0.3)',
+                        } : undefined}
                       >
                         {content}
                       </button>
@@ -251,6 +277,12 @@ function DeathRun({ onBack }: DeathRunProps) {
           >
             CASH OUT {multiplier.toFixed(2)}x
           </button>
+        )}
+
+        {gameState === 'suspense' && (
+          <div className="w-full py-3.5 rounded-xl bg-[#ffb34720] text-center text-[#ffb347] font-bold text-sm animate-fade-in">
+            ...
+          </div>
         )}
 
         {gameState === 'playing' && picks.length === 0 && (

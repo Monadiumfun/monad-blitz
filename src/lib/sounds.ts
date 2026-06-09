@@ -95,6 +95,22 @@ export function sfxBust() {
   }
 }
 
+export function sfxSuspense() {
+  const c = getCtx()
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(200, c.currentTime)
+  osc.frequency.exponentialRampToValueAtTime(800, c.currentTime + 0.6)
+  gain.gain.setValueAtTime(0.18, c.currentTime)
+  gain.gain.setValueAtTime(0.18, c.currentTime + 0.5)
+  gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.65)
+  osc.connect(gain)
+  gain.connect(c.destination)
+  osc.start()
+  osc.stop(c.currentTime + 0.65)
+}
+
 export function sfxStreak() {
   const c = getCtx()
   const now = c.currentTime
