@@ -1,6 +1,6 @@
 import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
 import { createUser, getUser, initSchema, isUsernameTaken, markFunded, resolveReferrer, setWallet } from "./_lib/db.ts";
-import { deriveUserAddress } from "./_lib/wallet.ts";
+import { smartAccountAddress } from "./_lib/aa.ts";
 import { fundNewUser } from "./_lib/chain.ts";
 import type { Hex } from "viem";
 
@@ -52,9 +52,9 @@ export default async function handler(req: Req, res: Res) {
     return sendJson(res, 409, { error: "username_taken", message: "Username already taken." });
   }
 
-  // Each account gets its own deterministic wallet, then we fund it with
-  // BLITZ + MON gas so they can play immediately.
-  const walletAddress = deriveUserAddress(user.telegram_id);
+  // Each account gets its own deterministic ERC-4337 smart account (owner key
+  // derived server-side); gas is sponsored by the paymaster so we only fund BLITZ.
+  const walletAddress = await smartAccountAddress(user.telegram_id);
   await setWallet(user.telegram_id, walletAddress);
 
   let funded = false;

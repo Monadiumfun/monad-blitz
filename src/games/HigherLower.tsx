@@ -1,18 +1,24 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { getRandomPair, categoryLabels } from '../data/entities'
 import { getEntityImage } from '../data/images'
-import { sfxCorrect, sfxWrong, sfxTap, sfxBust } from '../lib/sounds'
+import { sfxCorrect, sfxWrong, sfxTap, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
-import { api } from '../lib/api'
+import BetSelector from '../components/BetSelector'
+import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 import type { Entity } from '../types'
+
+type ChainStatus = 'idle' | 'starting' | 'live' | 'settling' | 'settled' | 'error'
 
 interface HigherLowerProps {
   onBack: () => void
   blitzBalance: number
 }
 
-type Phase = 'playing' | 'correct' | 'wrong' | 'gameover'
+type Phase = 'setup' | 'playing' | 'correct' | 'wrong' | 'result'
+
+const BATCH_SIZE = 5
+const MULTIPLIER_BY_CORRECT = [0, 0.2, 0.5, 1.0, 1.8, 3.0]
 
 const categoryColors: Record<string, string> = {
   crypto: '#a2e634',
@@ -24,37 +30,48 @@ const categoryColors: Record<string, string> = {
   food: '#ffb347',
 }
 
-function HigherLower({ onBack }: HigherLowerProps) {
+function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
   const [leftCard, setLeftCard] = useState<Entity>(() => getRandomPair(true)[0])
   const [rightCard, setRightCard] = useState<Entity>(() => getRandomPair(true)[1])
-  const [streak, setStreak] = useState(0)
-  const [phase, setPhase] = useState<Phase>('playing')
+  const [phase, setPhase] = useState<Phase>('setup')
+  const [wager, setWager] = useState(() => clampWager(WAGER_DEFAULT, blitzBalance))
+  const [round, setRound] = useState(0)
+  const [correctCount, setCorrectCount] = useState(0)
   const [picked, setPicked] = useState<'left' | 'right' | null>(null)
   const [animKey, setAnimKey] = useState(0)
-  const [votePercent, setVotePercent] = useState<number | null>(null)
+  const [chainStatus, setChainStatus] = useState<ChainStatus>('idle')
+  const [txHash, setTxHash] = useState<string | null>(null)
 
-  useEffect(() => {
-    startChainGame('higher-lower')
-  }, [])
-
-  useEffect(() => {
-    api.getVotes([leftCard.name, rightCard.name])
-      .then(r => {
-        const lv = r.votes[leftCard.name] || 0
-        const rv = r.votes[rightCard.name] || 0
-        if (lv + rv > 0) {
-          setVotePercent(Math.round((Math.max(lv, rv) / (lv + rv)) * 100))
-        } else {
-          setVotePercent(null)
-        }
-      })
-      .catch(() => setVotePercent(null))
-  }, [leftCard.name, rightCard.name])
-
-  const initCards = useCallback(() => {
+  const beginBatch = useCallback(() => {
     const [a, b] = getRandomPair(true)
     setLeftCard(a)
     setRightCard(b)
+    setRound(0)
+    setCorrectCount(0)
+    setPicked(null)
+    setAnimKey(k => k + 1)
+    setTxHash(null)
+    setChainStatus('starting')
+    setPhase('playing')
+    void startChainGame('higher-lower', wager).then(r => {
+      if (!r) return setChainStatus('error')
+      setChainStatus('live')
+      setTxHash(r.txHash)
+    })
+  }, [wager])
+
+  const finishBatch = useCallback((finalCorrect: number) => {
+    const multiplier = MULTIPLIER_BY_CORRECT[finalCorrect] ?? 0
+    if (multiplier >= 1) sfxCashout()
+    else sfxBust()
+    addScore('higher-lower', finalCorrect, `${finalCorrect}/${BATCH_SIZE}`)
+    setChainStatus('settling')
+    void endChainGame(finalCorrect, multiplier).then(r => {
+      if (!r) return setChainStatus('error')
+      setTxHash(r.txHash)
+      setChainStatus('settled')
+    })
+    setPhase('result')
   }, [])
 
   const handlePick = useCallback((side: 'left' | 'right') => {
@@ -62,82 +79,38 @@ function HigherLower({ onBack }: HigherLowerProps) {
 
     const pickedEntity = side === 'left' ? leftCard : rightCard
     const otherEntity = side === 'left' ? rightCard : leftCard
+    const correct = pickedEntity.value >= otherEntity.value
 
     setPicked(side)
     sfxTap()
+    recordChainMove(correct ? 0 : 1, round + 1)
 
-    api.vote(pickedEntity.name)
-    recordChainMove(0, streak + 1)
+    const newCorrect = correct ? correctCount + 1 : correctCount
+    const nextRound = round + 1
 
-    api.getVotes([pickedEntity.name, otherEntity.name])
-      .then(r => {
-        const pv = r.votes[pickedEntity.name] || 0
-        const ov = r.votes[otherEntity.name] || 0
-        const correct = pv >= ov
+    if (correct) {
+      sfxCorrect()
+      setPhase('correct')
+    } else {
+      sfxWrong()
+      setPhase('wrong')
+    }
+    setCorrectCount(newCorrect)
 
-        if (correct) {
-          sfxCorrect()
-          setPhase('correct')
-          setStreak(s => s + 1)
-          if (pv + ov > 0) setVotePercent(Math.round((pv / (pv + ov)) * 100))
-          setTimeout(() => {
-            const [, next] = getRandomPair(true)
-            setLeftCard(side === 'left' ? leftCard : rightCard)
-            setRightCard(next)
-            setPhase('playing')
-            setPicked(null)
-            setVotePercent(null)
-            setAnimKey(k => k + 1)
-          }, 1000)
-        } else {
-          sfxWrong()
-          if (pv + ov > 0) setVotePercent(Math.round((ov / (pv + ov)) * 100))
-          setPhase('wrong')
-          setTimeout(() => {
-            sfxBust()
-            addScore('higher-lower', streak, `${streak} streak`)
-            endChainGame(streak, streak)
-            setPhase('gameover')
-          }, 1200)
-        }
-      })
-      .catch(() => {
-        const correct = pickedEntity.value >= otherEntity.value
-        if (correct) {
-          sfxCorrect()
-          setPhase('correct')
-          setStreak(s => s + 1)
-          setTimeout(() => {
-            const [, next] = getRandomPair(true)
-            setLeftCard(side === 'left' ? leftCard : rightCard)
-            setRightCard(next)
-            setPhase('playing')
-            setPicked(null)
-            setVotePercent(null)
-            setAnimKey(k => k + 1)
-          }, 1000)
-        } else {
-          sfxWrong()
-          setPhase('wrong')
-          setTimeout(() => {
-            sfxBust()
-            addScore('higher-lower', streak, `${streak} streak`)
-            endChainGame(streak, streak)
-            setPhase('gameover')
-          }, 1200)
-        }
-      })
-  }, [phase, leftCard, rightCard, streak])
-
-  const handlePlayAgain = useCallback(() => {
-    startChainGame('higher-lower')
-    initCards()
-    setStreak(0)
-    setPhase('playing')
-    setPicked(null)
-    setVotePercent(null)
-    setAnimKey(k => k + 1)
-  }, [initCards])
+    setTimeout(() => {
+      if (nextRound >= BATCH_SIZE) {
+        finishBatch(newCorrect)
+        return
+      }
+      const [, next] = getRandomPair(true)
+      setLeftCard(side === 'left' ? leftCard : rightCard)
+      setRightCard(next)
+      setRound(nextRound)
+      setPhase('playing')
+      setPicked(null)
+      setAnimKey(k => k + 1)
+    }, 900)
+  }, [phase, leftCard, rightCard, round, correctCount, finishBatch])
 
   const renderCard = (entity: Entity, side: 'left' | 'right') => {
     const isPicked = picked === side
@@ -155,11 +128,21 @@ function HigherLower({ onBack }: HigherLowerProps) {
           canTap ? 'cursor-pointer active:scale-[0.96] hover:border-[#6b7280]' : 'cursor-default'
         } ${isWrong ? 'animate-shake' : ''} ${side === 'right' ? 'animate-slide-right' : ''}`}
         style={{
-          backgroundColor: isCorrect ? '#a2e63415' : isWrong ? '#e74c3c15' : '#12121a',
-          borderColor: isCorrect ? '#a2e634' : isWrong ? '#e74c3c' : '#2a2a3a',
+          backgroundColor: isCorrect
+            ? '#a2e63415'
+            : isWrong
+              ? '#e74c3c15'
+              : '#12121a',
+          borderColor: isCorrect
+            ? '#a2e634'
+            : isWrong
+              ? '#e74c3c'
+              : '#2a2a3a',
           boxShadow: isCorrect
             ? '0 0 30px rgba(162, 230, 52, 0.15)'
-            : isWrong ? '0 0 30px rgba(231, 76, 60, 0.15)' : 'none',
+            : isWrong
+              ? '0 0 30px rgba(231, 76, 60, 0.15)'
+              : 'none',
         }}
       >
         {(() => {
@@ -173,13 +156,74 @@ function HigherLower({ onBack }: HigherLowerProps) {
         <span className="text-base font-bold text-white text-center leading-tight">{entity.name}</span>
         <span
           className="text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full"
-          style={{ backgroundColor: `${catColor}15`, color: catColor }}
+          style={{
+            backgroundColor: `${catColor}15`,
+            color: catColor,
+          }}
         >
           {categoryLabels[entity.category] || entity.category}
         </span>
       </button>
     )
   }
+
+  if (phase === 'setup') {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
+        <div className="w-full max-w-[420px] flex flex-col gap-6 animate-fade-in">
+          <header className="flex items-center">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Back
+            </button>
+          </header>
+
+          <div className="text-center">
+            <span className="text-4xl mb-3 block">🔥</span>
+            <h1 className="text-2xl font-bold text-white">Higher Lower</h1>
+            <p className="text-sm text-[#6b7280] mt-1">
+              {BATCH_SIZE} picks per bet. 3+ correct to profit.
+            </p>
+          </div>
+
+          <BetSelector balance={blitzBalance} value={wager} onChange={setWager} />
+
+          <div className="rounded-2xl border border-[#2a2a3a] bg-[#12121a] p-4">
+            <div className="flex justify-between text-[10px] uppercase tracking-wider text-[#6b7280] mb-2">
+              <span>Correct</span>
+              <span>Multiplier</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              {MULTIPLIER_BY_CORRECT.map((m, i) => (
+                <div key={i} className="flex justify-between text-sm">
+                  <span className="text-white">{i}/{BATCH_SIZE}</span>
+                  <span className={m >= 1 ? 'text-[#a2e634] font-mono font-bold' : 'text-[#e74c3c] font-mono'}>
+                    {m.toFixed(2)}x
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={beginBatch}
+            disabled={maxAffordable(blitzBalance) < WAGER_MIN}
+            className="w-full py-3.5 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Bet {wager} & Play
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const finalMultiplier = MULTIPLIER_BY_CORRECT[correctCount] ?? 0
+  const won = finalMultiplier >= 1
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
@@ -194,14 +238,16 @@ function HigherLower({ onBack }: HigherLowerProps) {
             </svg>
           </button>
           <div className="flex flex-col items-center">
-            <span className="text-[10px] text-[#6b7280] uppercase tracking-wide">Streak</span>
-            <span className="text-xl font-bold text-[#a2e634]">{streak}</span>
+            <span className="text-[10px] text-[#6b7280] uppercase tracking-wide">
+              Pick {Math.min(round + 1, BATCH_SIZE)}/{BATCH_SIZE}
+            </span>
+            <span className="text-xl font-bold text-[#a2e634]">{correctCount} correct</span>
           </div>
           <div className="w-[24px]" />
         </header>
 
         <div className="text-center mb-3">
-          <span className="text-xs text-[#6b7280]">Tap the more popular one</span>
+          <span className="text-xs text-[#6b7280]">Tap the higher value</span>
         </div>
 
         <div className="flex gap-3 flex-1 items-stretch mb-4">
@@ -214,26 +260,50 @@ function HigherLower({ onBack }: HigherLowerProps) {
             phase === 'correct' ? 'bg-[#a2e63420] text-[#a2e634]' : 'bg-[#e74c3c20] text-[#e74c3c]'
           }`}>
             {phase === 'correct' ? 'CORRECT!' : 'WRONG!'}
-            {votePercent !== null && (
-              <span className="block text-xs font-normal mt-1 opacity-70">
-                {votePercent}% of players agree
-              </span>
-            )}
           </div>
         )}
 
-        {phase === 'gameover' && (
+        <div className="text-[10px] text-center pb-2 min-h-[16px]">
+          {chainStatus === 'starting' && <span className="text-[#6b7280]">Starting on-chain...</span>}
+          {chainStatus === 'live' && (
+            <span className="text-[#22c55e] flex items-center justify-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+              On-chain
+            </span>
+          )}
+          {chainStatus === 'settling' && <span className="text-[#6b7280]">Settling...</span>}
+          {chainStatus === 'settled' && txHash && (
+            <span className="text-[#6b7280]">
+              Settled{' '}
+              <a
+                href={`https://testnet.monadscan.com/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-[#6b7280] hover:text-white"
+              >
+                {txHash.slice(0, 6)}...{txHash.slice(-4)}
+              </a>
+            </span>
+          )}
+          {chainStatus === 'error' && <span className="text-[#4b5563]">Off-chain</span>}
+        </div>
+
+        {phase === 'result' && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 animate-fade-in">
             <div className="flex flex-col items-center gap-5 rounded-2xl border border-[#2a2a3a] bg-[#12121a] px-8 py-10 w-[320px]">
-              <span className="text-4xl">💀</span>
-              <h2 className="text-xl font-bold text-white">Game Over</h2>
+              <span className="text-4xl">{won ? '🎉' : '💀'}</span>
+              <h2 className={`text-xl font-bold ${won ? 'text-[#a2e634]' : 'text-[#e74c3c]'}`}>
+                {won ? 'You Win!' : 'Busted'}
+              </h2>
               <div className="flex flex-col items-center gap-1">
-                <span className="text-sm text-[#6b7280]">Best Streak</span>
-                <span className="text-4xl font-bold text-[#a2e634] animate-count-up">{streak}</span>
+                <span className="text-sm text-[#6b7280]">{correctCount}/{BATCH_SIZE} correct</span>
+                <span className={`text-4xl font-mono font-bold animate-count-up ${won ? 'text-[#a2e634]' : 'text-[#e74c3c]'}`}>
+                  {finalMultiplier.toFixed(2)}x
+                </span>
               </div>
               <div className="flex flex-col gap-2.5 w-full mt-2">
                 <button
-                  onClick={handlePlayAgain}
+                  onClick={() => setPhase('setup')}
                   className="w-full py-3.5 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97]"
                 >
                   Play Again

@@ -16,6 +16,7 @@ const routes = {
   "/api/game-start": () => import("./game-start.ts"),
   "/api/game-move": () => import("./game-move.ts"),
   "/api/game-end": () => import("./game-end.ts"),
+  "/api/game-outcome": () => import("./game-outcome.ts"),
   "/api/vote": () => import("./vote.ts"),
 };
 

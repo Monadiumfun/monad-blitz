@@ -1,6 +1,6 @@
 import { applyCors, authenticate, sendJson, type Req, type Res } from "./_lib/http.ts";
 import { countReferrals, getUser, initSchema, markFunded, setWallet } from "./_lib/db.ts";
-import { deriveUserAddress } from "./_lib/wallet.ts";
+import { smartAccountAddress } from "./_lib/aa.ts";
 import { fundNewUser, getBalances } from "./_lib/chain.ts";
 import type { Hex } from "viem";
 
@@ -25,12 +25,13 @@ export default async function handler(req: Req, res: Res) {
   const referrals = await countReferrals(user.telegram_id);
   const botUsername = process.env.BOT_USERNAME || "monad_blitz_bot";
 
-  // Ensure the wallet exists (older rows) and is funded; self-heal if a
-  // previous funding attempt failed.
-  const walletAddress = (user.wallet_address || deriveUserAddress(user.telegram_id)) as Hex;
-  if (!user.wallet_address) await setWallet(user.telegram_id, walletAddress);
+  // Ensure the wallet is the ERC-4337 smart account address; rows created
+  // before the AA migration stored the owner EOA — re-point and re-fund them.
+  const walletAddress = (await smartAccountAddress(user.telegram_id)) as Hex;
+  const migrated = user.wallet_address !== walletAddress;
+  if (migrated) await setWallet(user.telegram_id, walletAddress);
 
-  let funded = !!user.funded;
+  let funded = !!user.funded && !migrated;
   if (!funded) {
     const fund = await fundNewUser(walletAddress);
     if (fund.ok) {

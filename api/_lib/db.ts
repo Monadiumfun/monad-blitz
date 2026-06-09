@@ -43,13 +43,33 @@ export async function initSchema(): Promise<void> {
         score       INTEGER NOT NULL,
         created_at  TEXT NOT NULL DEFAULT (datetime('now'))
       )`,
+      `CREATE TABLE IF NOT EXISTS games (
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        telegram_id    INTEGER NOT NULL,
+        game           TEXT NOT NULL,
+        onchain_id     INTEGER NOT NULL,
+        seed           TEXT NOT NULL,
+        wager          TEXT NOT NULL,
+        status         TEXT NOT NULL DEFAULT 'active',
+        multiplier_bps INTEGER,
+        start_tx       TEXT,
+        end_tx         TEXT,
+        created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
       `CREATE INDEX IF NOT EXISTS idx_users_referred_by ON users(referred_by)`,
       `CREATE INDEX IF NOT EXISTS idx_scores_game ON scores(game, score)`,
+      `CREATE INDEX IF NOT EXISTS idx_games_player ON games(telegram_id, status)`,
     ],
     "write",
   );
   // migration: funding flag for the per-user wallet (ignore if it already exists)
   await c.execute("ALTER TABLE users ADD COLUMN funded INTEGER NOT NULL DEFAULT 0").catch(() => {});
+  // migrations: provably-fair columns on games
+  await c.execute("ALTER TABLE games ADD COLUMN client_seed TEXT NOT NULL DEFAULT ''").catch(() => {});
+  await c.execute("ALTER TABLE games ADD COLUMN config TEXT NOT NULL DEFAULT '{}'").catch(() => {});
+  await c.execute("ALTER TABLE games ADD COLUMN progress INTEGER NOT NULL DEFAULT 0").catch(() => {});
+  await c.execute("ALTER TABLE games ADD COLUMN busted INTEGER NOT NULL DEFAULT 0").catch(() => {});
+  await c.execute("ALTER TABLE games ADD COLUMN mult REAL NOT NULL DEFAULT 1").catch(() => {});
   _initialized = true;
 }
 
@@ -155,6 +175,90 @@ export async function setWallet(telegramId: number, wallet: string): Promise<voi
 export async function markFunded(telegramId: number): Promise<void> {
   const c = db();
   await c.execute({ sql: "UPDATE users SET funded = 1 WHERE telegram_id = ?", args: [telegramId] });
+}
+
+export interface GameRow {
+  id: number;
+  telegram_id: number;
+  game: string;
+  onchain_id: number;
+  seed: string;
+  wager: string;
+  status: string;
+  multiplier_bps: number | null;
+  start_tx: string | null;
+  end_tx: string | null;
+  client_seed: string;
+  config: string;
+  progress: number;
+  busted: number;
+  mult: number;
+  created_at: string;
+}
+
+export async function insertGame(opts: {
+  telegramId: number;
+  game: string;
+  onchainId: number;
+  seed: string;
+  wager: string;
+  startTx: string;
+  clientSeed: string;
+  config: string;
+}): Promise<void> {
+  const c = db();
+  await c.execute({
+    sql: `INSERT INTO games (telegram_id, game, onchain_id, seed, wager, start_tx, client_seed, config)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      opts.telegramId,
+      opts.game,
+      opts.onchainId,
+      opts.seed,
+      opts.wager,
+      opts.startTx,
+      opts.clientSeed,
+      opts.config,
+    ],
+  });
+}
+
+export async function advanceGame(opts: {
+  telegramId: number;
+  onchainId: number;
+  progress: number;
+  mult: number;
+  busted: boolean;
+}): Promise<void> {
+  const c = db();
+  await c.execute({
+    sql: `UPDATE games SET progress = ?, mult = ?, busted = ?
+          WHERE telegram_id = ? AND onchain_id = ? AND status = 'active'`,
+    args: [opts.progress, opts.mult, opts.busted ? 1 : 0, opts.telegramId, opts.onchainId],
+  });
+}
+
+export async function getActiveGame(telegramId: number, onchainId: number): Promise<GameRow | null> {
+  const c = db();
+  const r = await c.execute({
+    sql: "SELECT * FROM games WHERE telegram_id = ? AND onchain_id = ? AND status = 'active'",
+    args: [telegramId, onchainId],
+  });
+  return (r.rows[0] as unknown as GameRow) ?? null;
+}
+
+export async function settleGame(opts: {
+  telegramId: number;
+  onchainId: number;
+  multiplierBps: number;
+  endTx: string;
+}): Promise<void> {
+  const c = db();
+  await c.execute({
+    sql: `UPDATE games SET status = 'settled', multiplier_bps = ?, end_tx = ?
+          WHERE telegram_id = ? AND onchain_id = ? AND status = 'active'`,
+    args: [opts.multiplierBps, opts.endTx, opts.telegramId, opts.onchainId],
+  });
 }
 
 export async function submitScore(telegramId: number, game: string, score: number): Promise<void> {

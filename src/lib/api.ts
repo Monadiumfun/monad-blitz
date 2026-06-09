@@ -70,26 +70,35 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ game, score }),
     }).catch(() => ({ ok: false })),
-  gameStart: (game: string, wager?: number) =>
+  gameStart: (
+    game: string,
+    wager?: number,
+    clientSeed?: string,
+    config?: { tiles?: number; grid?: number },
+  ) =>
     request<{ gameId: number; txHash: string }>("/api/game-start", {
       method: "POST",
-      body: JSON.stringify({ game, wager }),
+      body: JSON.stringify({ game, wager, clientSeed, config }),
     }),
   gameMove: (gameId: number, moveType: number, value: number) =>
     request<{ txHash: string }>("/api/game-move", {
       method: "POST",
       body: JSON.stringify({ gameId, moveType, value }),
     }),
+  gameOutcome: (gameId: number, index: number, pick: number | { row: number; col: number }) =>
+    request<{
+      mine?: number;
+      dim?: "row" | "col";
+      target?: number;
+      hit: boolean;
+      multiplier: number;
+    }>("/api/game-outcome", {
+      method: "POST",
+      body: JSON.stringify({ gameId, index, pick }),
+    }),
   gameEnd: (gameId: number, score: number, multiplier: number) =>
     request<{ txHash: string; payout: string | null }>("/api/game-end", {
       method: "POST",
       body: JSON.stringify({ gameId, score, multiplier }),
     }),
-  vote: (entity: string) =>
-    request<{ txHash: string }>("/api/vote", {
-      method: "POST",
-      body: JSON.stringify({ entity }),
-    }).catch(() => null),
-  getVotes: (entities: string[]) =>
-    request<{ votes: Record<string, number> }>(`/api/vote?entities=${entities.map(encodeURIComponent).join(",")}`),
 };

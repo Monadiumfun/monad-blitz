@@ -1,11 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { sfxTap, sfxCorrect, sfxBust, sfxCashout, sfxSuspense } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
-import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
-import { api } from '../lib/api'
+import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
+import BetSelector from '../components/BetSelector'
+import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 
 interface DeathRunProps {
   onBack: () => void
+  blitzBalance: number
 }
 
 type GameState = 'setup' | 'playing' | 'suspense' | 'cashout' | 'bust'
@@ -31,18 +33,37 @@ const DIFFICULTIES: { tiles: TilesPerRow; label: string; desc: string }[] = [
   { tiles: 4, label: 'Hard', desc: '1 mine in 4 tiles' },
 ]
 
-function DeathRun({ onBack }: DeathRunProps) {
+function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
   const [gameState, setGameState] = useState<GameState>('setup')
+  const [wager, setWager] = useState(() => clampWager(WAGER_DEFAULT, blitzBalance))
   const [tilesPerRow, setTilesPerRow] = useState<TilesPerRow>(2)
   const [currentRow, setCurrentRow] = useState(0)
   const [mines, setMines] = useState<number[]>([])
   const [picks, setPicks] = useState<number[]>([])
   const [suspenseTile, setSuspenseTile] = useState<number>(-1)
-  const [chainGameId, setChainGameId] = useState<number | null>(null)
   const [chainStatus, setChainStatus] = useState<ChainStatus>('idle')
   const [txHash, setTxHash] = useState<string | null>(null)
   const currentRowRef = useRef<HTMLDivElement | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const fireGameStart = useCallback((tiles: TilesPerRow) => {
+    setChainStatus('starting')
+    setTxHash(null)
+    void startChainGame('death-run', wager, { tiles }).then(r => {
+      if (!r) return setChainStatus('error')
+      setChainStatus('live')
+      setTxHash(r.txHash)
+    })
+  }, [wager])
+
+  const settleOnChain = useCallback((score: number, mult: number) => {
+    setChainStatus('settling')
+    void endChainGame(score, mult).then(r => {
+      if (!r) return setChainStatus('error')
+      setTxHash(r.txHash)
+      setChainStatus('settled')
+    })
+  }, [])
 
   useEffect(() => {
     if ((gameState === 'playing' || gameState === 'suspense') && currentRowRef.current) {
@@ -52,38 +73,15 @@ function DeathRun({ onBack }: DeathRunProps) {
 
   const multiplier = cumulativeMultiplier(tilesPerRow, picks.length)
 
-  const ensureMines = useCallback((upTo: number, tiles: TilesPerRow, existing: number[]) => {
-    if (existing.length > upTo) return existing
-    const extended = [...existing]
-    while (extended.length <= upTo) {
-      extended.push(Math.floor(Math.random() * tiles))
-    }
-    return extended
-  }, [])
-
   const startGame = useCallback((tiles: TilesPerRow) => {
-    startChainGame('death-run')
+    fireGameStart(tiles)
     setTilesPerRow(tiles)
-    const initial: number[] = []
-    for (let i = 0; i < PREVIEW_ROWS + 1; i++) {
-      initial.push(Math.floor(Math.random() * tiles))
-    }
-    setMines(initial)
+    setMines([])
     setCurrentRow(0)
     setPicks([])
     setSuspenseTile(-1)
-    setChainStatus('starting')
-    setTxHash(null)
-    setChainGameId(null)
     setGameState('playing')
-    api.gameStart('death-run').then(res => {
-      setChainGameId(res.gameId)
-      setTxHash(res.txHash)
-      setChainStatus('live')
-    }).catch(() => {
-      setChainStatus('error')
-    })
-  }, [])
+  }, [fireGameStart])
 
   const handleTilePick = useCallback((rowIndex: number, tileIndex: number) => {
     if (gameState !== 'playing' || rowIndex !== currentRow) return
@@ -94,79 +92,58 @@ function DeathRun({ onBack }: DeathRunProps) {
     setSuspenseTile(tileIndex)
     setGameState('suspense')
 
-    timerRef.current = setTimeout(() => {
-      setSuspenseTile(-1)
+    // The mine position is derived server-side from the committed seeds
+    // (provably fair); local random is only a degraded offline fallback.
+    const outcome = fetchOutcome(picks.length, tileIndex)
+    const suspense = new Promise<void>(resolve => {
+      timerRef.current = setTimeout(resolve, SUSPENSE_MS)
+    })
+    void Promise.all([outcome, suspense]).then(([o]) => {
+      const mine = o?.mine ?? Math.floor(Math.random() * tilesPerRow)
+      const hit = o ? o.hit : mine === tileIndex
 
-      if (mines[rowIndex] === tileIndex) {
+      setSuspenseTile(-1)
+      setMines(prev => {
+        const next = [...prev]
+        next[rowIndex] = mine
+        return next
+      })
+
+      if (hit) {
         sfxBust()
         const mult = cumulativeMultiplier(tilesPerRow, picks.length)
         addScore('death-run', mult, `Row ${picks.length}`)
-        endChainGame(picks.length, 0)
+        settleOnChain(picks.length, 0)
         setPicks(p => [...p, tileIndex])
         setGameState('bust')
-        if (chainGameId != null) {
-          setChainStatus('settling')
-          api.gameEnd(chainGameId, picks.length, 0).then(res => {
-            setTxHash(res.txHash)
-            setChainStatus('settled')
-          }).catch(() => {
-            setChainStatus('error')
-          })
-        }
         return
       }
 
       sfxCorrect()
-      const newPicks = [...picks, tileIndex]
-      setPicks(newPicks)
-      const nextRow = currentRow + 1
-      setCurrentRow(nextRow)
-      setMines(prev => ensureMines(nextRow + PREVIEW_ROWS, tilesPerRow, prev))
+      setPicks(p => [...p, tileIndex])
+      setCurrentRow(rowIndex + 1)
       setGameState('playing')
-    }, SUSPENSE_MS)
-  }, [gameState, currentRow, mines, picks, tilesPerRow, ensureMines, chainGameId])
+    })
+  }, [gameState, currentRow, picks, tilesPerRow, settleOnChain])
 
   const handleCashOut = useCallback(() => {
     if (gameState === 'playing' && picks.length > 0) {
       sfxCashout()
       addScore('death-run', multiplier, `Row ${picks.length}`)
-      endChainGame(picks.length, multiplier)
+      settleOnChain(picks.length, multiplier)
       setGameState('cashout')
-      if (chainGameId != null) {
-        setChainStatus('settling')
-        api.gameEnd(chainGameId, picks.length, multiplier).then(res => {
-          setTxHash(res.txHash)
-          setChainStatus('settled')
-        }).catch(() => {
-          setChainStatus('error')
-        })
-      }
     }
-  }, [gameState, picks.length, multiplier, chainGameId])
+  }, [gameState, picks.length, multiplier, settleOnChain])
 
   const handlePlayAgain = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    startChainGame('death-run')
-    const initial: number[] = []
-    for (let i = 0; i < PREVIEW_ROWS + 1; i++) {
-      initial.push(Math.floor(Math.random() * tilesPerRow))
-    }
-    setMines(initial)
+    fireGameStart(tilesPerRow)
+    setMines([])
     setCurrentRow(0)
     setPicks([])
     setSuspenseTile(-1)
-    setChainGameId(null)
-    setChainStatus('starting')
-    setTxHash(null)
     setGameState('playing')
-    api.gameStart('death-run').then(res => {
-      setChainGameId(res.gameId)
-      setTxHash(res.txHash)
-      setChainStatus('live')
-    }).catch(() => {
-      setChainStatus('error')
-    })
-  }, [tilesPerRow])
+  }, [tilesPerRow, fireGameStart])
 
   if (gameState === 'setup') {
     return (
@@ -190,12 +167,15 @@ function DeathRun({ onBack }: DeathRunProps) {
             <p className="text-sm text-[#6b7280] mt-1">Climb forever. Avoid the mines. Cash out anytime.</p>
           </div>
 
+          <BetSelector balance={blitzBalance} value={wager} onChange={setWager} />
+
           <div className="flex flex-col gap-3">
             {DIFFICULTIES.map(({ tiles, label, desc }) => (
               <button
                 key={tiles}
                 onClick={() => startGame(tiles)}
-                className="flex items-center justify-between rounded-2xl border border-[#2a2a3a] bg-[#12121a] p-5 transition-all duration-150 hover:border-[#a2e634] hover:bg-[#1a1a2e] active:scale-[0.98]"
+                disabled={maxAffordable(blitzBalance) < WAGER_MIN}
+                className="flex items-center justify-between rounded-2xl border border-[#2a2a3a] bg-[#12121a] p-5 transition-all duration-150 hover:border-[#a2e634] hover:bg-[#1a1a2e] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2a2a3a]"
               >
                 <div className="flex flex-col items-start gap-1">
                   <span className="text-base font-bold text-white">{label}</span>
@@ -275,7 +255,7 @@ function DeathRun({ onBack }: DeathRunProps) {
                     const isPicked = isCompletedRow && picks[rowIndex] === tileIndex
                     const isMine = mines[rowIndex] === tileIndex
                     const isDeathPick = isBustRow && isPicked && isMine
-                    const isRevealedMine = showMines && isMine && !isDeathPick && isCompletedRow
+                    const isRevealedMine = isMine && !isDeathPick && isCompletedRow
                     const isSuspenseTile = isSuspenseRow && tileIndex === suspenseTile
 
                     let tileClass = 'bg-[#1a1a2e] border-[#2a2a3a]'

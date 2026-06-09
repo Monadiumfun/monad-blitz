@@ -100,8 +100,13 @@ export function fundNewUser(to: Hex): Promise<FundResult> {
         () => wallet.writeContract({ address: BLITZ_ADDRESS, abi: BLITZ_ABI, functionName: "mint", args: [to, blitz] }),
         "mint",
       );
-      await sleep(STEP_DELAY_MS);
-      const monTx = await sendConfirmed(() => wallet.sendTransaction({ to, value: mon }), "mon");
+
+      // Gas is sponsored by the paymaster; a MON grant is only sent if explicitly configured.
+      let monTx: Hex | undefined;
+      if (mon > BigInt(0)) {
+        await sleep(STEP_DELAY_MS);
+        monTx = await sendConfirmed(() => wallet.sendTransaction({ to, value: mon }), "mon");
+      }
 
       return { ok: true, blitzTx, monTx };
     } catch (e) {
