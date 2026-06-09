@@ -23,6 +23,7 @@ function App() {
   const [currentGame, setCurrentGame] = useState<GameId>("laser-party");
   const [drawer, setDrawer] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
+  const [showReferral, setShowReferral] = useState(false);
 
   useEffect(() => {
     initTelegram();
@@ -103,10 +104,15 @@ function App() {
     currentGame === "laser-party" ? <LaserParty onBack={openDrawer} blitzBalance={blitzBalance} /> :
     <DeathRun onBack={openDrawer} blitzBalance={blitzBalance} />;
 
+  const clearOverlays = () => { setShowRewards(false); setShowReferral(false); };
+  const balanceLabel = Math.floor(blitzBalance).toLocaleString("en-US");
+
   const content = showRewards ? (
     <Rewards onBack={() => setShowRewards(false)} onLeaderboard={() => { setShowRewards(false); setTab("leaderboard"); }} />
+  ) : showReferral ? (
+    <Leaderboard type="referral" user={user} onBack={() => setShowReferral(false)} />
   ) : tab === "leaderboard" ? (
-    <Leaderboard onBack={() => setTab("play")} user={user} />
+    <Leaderboard type="pnl" user={user} onBack={() => setTab("play")} />
   ) : tab === "history" ? (
     <Settings user={user} onBack={() => setTab("play")} />
   ) : (
@@ -117,14 +123,16 @@ function App() {
     <UserContext.Provider value={user}>
       <AppShell
         tab={tab}
-        onTab={(t) => { setShowRewards(false); setTab(t); }}
+        onTab={(t) => { clearOverlays(); setTab(t); }}
         currentGame={currentGame}
-        onSelectGame={(g) => { setShowRewards(false); setCurrentGame(g); }}
+        onSelectGame={(g) => { clearOverlays(); setCurrentGame(g); }}
         refCode={user.refCode}
         referralLink={user.referralLink}
         drawer={drawer}
         setDrawer={setDrawer}
-        onRewards={() => setShowRewards(true)}
+        onRewards={() => { setShowReferral(false); setShowRewards(true); }}
+        onReferralLeaderboard={() => { setShowRewards(false); setShowReferral(true); }}
+        balance={balanceLabel}
       >
         {content}
       </AppShell>

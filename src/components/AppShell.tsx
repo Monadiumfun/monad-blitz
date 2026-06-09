@@ -21,10 +21,12 @@ interface Props {
   drawer: boolean;
   setDrawer: (v: boolean) => void;
   onRewards: () => void;
+  onReferralLeaderboard: () => void;
+  balance: string;
   children: ReactNode;
 }
 
-function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, drawer, setDrawer, onRewards, children }: Props) {
+function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, drawer, setDrawer, onRewards, onReferralLeaderboard, balance, children }: Props) {
 
   function shareRef() {
     hapticTap();
@@ -36,20 +38,26 @@ function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink
     <div className="min-h-[100dvh] bg-[#0a0a0f]">
       {/* top bar */}
       <header className="fixed top-0 inset-x-0 z-30 h-14 flex items-center justify-between px-4 border-b border-[#1a1a24] bg-[#0a0a0f]/90 backdrop-blur">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button onClick={() => { hapticTap(); setDrawer(true); }} aria-label="Menu" className="p-1.5 -ml-1.5 text-[#8898a8] active:scale-90 transition">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
-          <button onClick={() => { hapticTap(); onRewards(); }} aria-label="Rewards" className="p-1.5 text-lg leading-none active:scale-90 transition">
-            🎁
+          {/* referral leaderboard + balance */}
+          <button
+            onClick={() => { hapticTap(); onReferralLeaderboard(); }}
+            aria-label="Referral leaderboard"
+            className="flex items-center gap-1.5 rounded-full border border-[#2a2a3a] bg-[#12121a] pl-2 pr-2.5 py-1 active:scale-95 transition"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-[#8898a8] shrink-0"><path d="M16 13c2.2 0 4 1.8 4 4v2M2 19v-2c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4v2M9 9a3 3 0 100-6 3 3 0 000 6zm9-1a2.5 2.5 0 100-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span className="text-[#6E54FF] font-bold text-xs tabular-nums leading-none">{balance}</span>
           </button>
         </div>
-        <span className="brand flex items-center gap-1.5 text-lg text-white absolute left-1/2 -translate-x-1/2">
+        <span className="brand flex items-center gap-0.5 text-lg text-white absolute left-1/2 -translate-x-1/2">
           <BlitzLogo className="h-[0.9em] w-auto text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 6px rgba(110,84,255,0.6))" }} />
           Blitz
         </span>
-        <button onClick={shareRef} aria-label="Invite" className="p-1.5 -mr-1.5 text-[#8898a8] active:scale-90 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 13c2.2 0 4 1.8 4 4v2M2 19v-2c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4v2M9 9a3 3 0 100-6 3 3 0 000 6zm9-1a2.5 2.5 0 100-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        <button onClick={() => { hapticTap(); onRewards(); }} aria-label="Rewards" className="p-1.5 -mr-1.5 text-xl leading-none active:scale-90 transition">
+          🎁
         </button>
       </header>
 

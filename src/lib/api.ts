@@ -18,9 +18,20 @@ export interface MeResponse {
   suggestedRef?: string | null;
 }
 
+export type LeaderboardType = "referral" | "pnl";
+
+export interface LeaderEntry {
+  rank: number;
+  username: string;
+  referrals?: number;
+  pnl?: number;
+  games?: number;
+}
+
 export interface LeaderboardResponse {
-  leaders: { rank: number; username: string; referrals: number }[];
-  me: { rank: number; username: string; referrals: number } | null;
+  type: LeaderboardType;
+  leaders: LeaderEntry[];
+  me: LeaderEntry | null;
 }
 
 // In dev (browser, no Telegram), fall back to a stable fake identity so the
@@ -69,7 +80,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ username, refCode: refCode || "" }),
     }),
-  leaderboard: () => request<LeaderboardResponse>("/api/leaderboard"),
+  leaderboard: (type: LeaderboardType = "referral") =>
+    request<LeaderboardResponse>(`/api/leaderboard?type=${type}`),
   submitScore: (game: string, score: number) =>
     request<{ ok: boolean }>("/api/score", {
       method: "POST",

@@ -146,6 +146,41 @@ export interface LeaderRow {
   telegram_id: number;
 }
 
+export interface PnlRow {
+  rank: number;
+  username: string;
+  pnl: number;
+  games: number;
+  telegram_id: number;
+}
+
+/**
+ * PnL leaderboard: net $BLITZ profit per player across settled games.
+ * Per game, profit = wager * (multiplier - 1) — a bust (multiplier 0) loses the
+ * wager. Wagers are stored in wei; divide by 1e18 to get $BLITZ.
+ */
+export async function pnlLeaderboard(limit = 100): Promise<PnlRow[]> {
+  const c = db();
+  const r = await c.execute({
+    sql: `SELECT g.telegram_id, u.username,
+                 SUM( (CAST(g.wager AS REAL) / 1e18) * (COALESCE(g.multiplier_bps, 0) / 10000.0 - 1) ) AS pnl,
+                 COUNT(*) AS games
+          FROM games g JOIN users u ON u.telegram_id = g.telegram_id
+          WHERE g.status = 'settled'
+          GROUP BY g.telegram_id
+          ORDER BY pnl DESC
+          LIMIT ?`,
+    args: [limit],
+  });
+  return r.rows.map((row, i) => ({
+    rank: i + 1,
+    username: String(row.username),
+    pnl: Number(row.pnl ?? 0),
+    games: Number(row.games ?? 0),
+    telegram_id: Number(row.telegram_id),
+  }));
+}
+
 export async function leaderboard(limit = 100): Promise<LeaderRow[]> {
   const c = db();
   const r = await c.execute({
