@@ -18,6 +18,7 @@ interface Props {
   onSelectGame: (g: GameId) => void;
   refCode: string;
   referralLink: string;
+  referrals: number;
   blitzBalance: number;
   drawer: boolean;
   setDrawer: (v: boolean) => void;
@@ -31,7 +32,7 @@ function fmtBlitz(n: number): string {
     : v.toLocaleString("en");
 }
 
-function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, blitzBalance, drawer, setDrawer, children }: Props) {
+function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, referrals, blitzBalance, drawer, setDrawer, children }: Props) {
 
   function shareRef() {
     hapticTap();
@@ -55,8 +56,13 @@ function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink
             <BlitzLogo className="h-3 w-auto text-[#6E54FF]" />
             <span className="text-xs font-bold tabular-nums text-white">{fmtBlitz(blitzBalance)}</span>
           </div>
-          <button onClick={shareRef} aria-label="Invite" className="p-1.5 text-[#8898a8] active:scale-90 transition">
+          <button onClick={shareRef} aria-label={`Invite — ${referrals} referrals`} className="relative p-1.5 text-[#8898a8] active:scale-90 transition">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 13c2.2 0 4 1.8 4 4v2M2 19v-2c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4v2M9 9a3 3 0 100-6 3 3 0 000 6zm9-1a2.5 2.5 0 100-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            {referrals > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-[#6E54FF] text-[10px] font-bold text-white tabular-nums">
+                {referrals > 99 ? "99+" : referrals}
+              </span>
+            )}
           </button>
         </div>
       </header>

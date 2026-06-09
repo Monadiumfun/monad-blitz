@@ -115,6 +115,7 @@ function App() {
         onSelectGame={(g) => setCurrentGame(g)}
         refCode={user.refCode}
         referralLink={user.referralLink}
+        referrals={user.referrals}
         blitzBalance={blitzBalance}
         drawer={drawer}
         setDrawer={setDrawer}

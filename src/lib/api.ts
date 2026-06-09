@@ -18,9 +18,20 @@ export interface MeResponse {
   suggestedRef?: string | null;
 }
 
+export interface LeaderRow {
+  rank: number;
+  username: string;
+  value: number;
+}
+
+export interface LeaderBoard {
+  leaders: LeaderRow[];
+  me: LeaderRow | null;
+}
+
 export interface LeaderboardResponse {
-  leaders: { rank: number; username: string; referrals: number }[];
-  me: { rank: number; username: string; referrals: number } | null;
+  referrals: LeaderBoard;
+  pnl: LeaderBoard;
 }
 
 // In dev (browser, no Telegram), fall back to a stable fake identity so the
