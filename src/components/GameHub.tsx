@@ -7,6 +7,7 @@ interface GameHubProps {
   user: ApiUser;
   onSelectGame: (gameId: GameId) => void;
   onOpenLeaderboard: () => void;
+  onOpenSettings: () => void;
 }
 
 const games = [
@@ -38,7 +39,7 @@ function fmt(n: string | undefined): string {
   return v.toLocaleString("en-US");
 }
 
-function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
+function GameHub({ user, onSelectGame, onOpenLeaderboard, onOpenSettings }: GameHubProps) {
   const [copied, setCopied] = useState(false);
 
   function share() {
@@ -79,6 +80,13 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
             >
               <span>🏆</span>
               <span className="text-[#a2e634] font-semibold text-sm">{user.referrals}</span>
+            </button>
+            <button
+              onClick={onOpenSettings}
+              aria-label="Settings"
+              className="flex items-center justify-center rounded-full bg-[#1a1a24] px-3 py-2 border border-[#2a2a3a] active:scale-95 transition-transform"
+            >
+              <span>⚙️</span>
             </button>
           </div>
         </header>

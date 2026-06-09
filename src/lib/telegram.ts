@@ -17,6 +17,7 @@ interface TgWebApp {
     selectionChanged: () => void;
   };
   openTelegramLink?: (url: string) => void;
+  openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
   showAlert?: (msg: string) => void;
 }
 
@@ -69,5 +70,12 @@ export function hapticTap(): void {
 export function openTelegramLink(url: string): void {
   const w = tg();
   if (w?.openTelegramLink) w.openTelegramLink(url);
+  else window.open(url, "_blank");
+}
+
+/** Open an external https link (e.g. a block explorer) in the system browser. */
+export function openLink(url: string): void {
+  const w = tg();
+  if (w?.openLink) w.openLink(url);
   else window.open(url, "_blank");
 }
