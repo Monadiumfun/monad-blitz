@@ -50,7 +50,7 @@ function Leaderboard({ onBack, user, type = "referral" }: Props) {
   const emptyMsg = isPnl ? "No games played yet. Win some $BLITZ to climb!" : "No players yet. Be the first to invite friends!";
 
   return (
-    <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center px-4 py-6">
+    <div className="min-h-[var(--tg-vh,100dvh)] bg-[#0a0a0f] flex flex-col items-center px-4 py-6">
       <div className="w-full max-w-[420px] flex flex-col gap-5">
         <header className="flex items-center justify-between">
           <button onClick={onBack} className="text-sm text-[#6b7280] hover:text-white transition-colors flex items-center gap-1">

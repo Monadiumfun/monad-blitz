@@ -50,7 +50,7 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
   }
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center px-5 py-8">
+    <div className="min-h-[var(--tg-vh,100dvh)] flex flex-col items-center px-5 py-8">
       <Suspense fallback={null}>
         <MonadGradientBackground />
       </Suspense>
