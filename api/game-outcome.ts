@@ -1,12 +1,12 @@
 import type { Hex } from "viem";
-import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { advanceGame, getActiveGame, getUser, initSchema } from "./_lib/db.ts";
+import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http";
+import { advanceGame, getActiveGame, getUser, initSchema } from "./_lib/db";
 import {
   deathRunMine,
   deathRunRowMultiplier,
   laserRound,
   laserRoundMultiplier,
-} from "./_lib/fair.ts";
+} from "./_lib/fair";
 
 interface OutcomeBody {
   gameId?: number;

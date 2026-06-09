@@ -1,7 +1,7 @@
-import { applyCors, authenticate, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { countReferrals, getUser, initSchema, markFunded, setWallet } from "./_lib/db.ts";
-import { smartAccountAddress } from "./_lib/aa.ts";
-import { fundNewUser, getBalances } from "./_lib/chain.ts";
+import { applyCors, authenticate, sendJson, type Req, type Res } from "./_lib/http";
+import { countReferrals, getUser, initSchema, markFunded, setWallet } from "./_lib/db";
+import { smartAccountAddress } from "./_lib/aa";
+import { fundNewUser, getBalances } from "./_lib/chain";
 import type { Hex } from "viem";
 
 export default async function handler(req: Req, res: Res) {

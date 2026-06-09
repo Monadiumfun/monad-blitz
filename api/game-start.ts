@@ -1,9 +1,9 @@
 import { randomBytes } from "node:crypto";
 import { keccak256, parseEther, type Hex } from "viem";
-import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { getUser, initSchema, insertGame } from "./_lib/db.ts";
-import { sendSponsored } from "./_lib/aa.ts";
-import { buildStartCalls, parseGameCreated, GAME_TYPES } from "./_lib/nadgames.ts";
+import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http";
+import { getUser, initSchema, insertGame } from "./_lib/db";
+import { sendSponsored } from "./_lib/aa";
+import { buildStartCalls, parseGameCreated, GAME_TYPES } from "./_lib/nadgames";
 
 export default async function handler(req: Req, res: Res) {
   applyCors(res);
