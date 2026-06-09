@@ -81,7 +81,7 @@ function Settings({ user, onBack }: Props) {
                   hapticTap();
                   openLink(explorerAddress(wallet));
                 }}
-                className="mt-1 w-full rounded-xl bg-[#a2e634] py-2.5 text-sm font-bold text-[#0a0a0f] active:scale-[0.98] transition"
+                className="mt-1 w-full rounded-xl bg-[#6E54FF] py-2.5 text-sm font-bold text-white active:scale-[0.98] transition"
               >
                 View transactions on explorer ↗
               </button>
@@ -101,7 +101,7 @@ function Settings({ user, onBack }: Props) {
                 const text = `Play on Monad with me 🎮 — use my code "${user.refCode}" or just tap:`;
                 openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(user.referralLink)}&text=${encodeURIComponent(text)}`);
               }}
-              className="flex-1 rounded-xl bg-[#a2e634] py-2.5 text-sm font-bold text-[#0a0a0f] active:scale-[0.98] transition"
+              className="flex-1 rounded-xl bg-[#6E54FF] py-2.5 text-sm font-bold text-white active:scale-[0.98] transition"
             >
               Share invite
             </button>
@@ -121,7 +121,7 @@ function Settings({ user, onBack }: Props) {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[#2a2a3a] bg-[#12121a] p-4">
-      <span className="text-[11px] uppercase tracking-wider text-[#a2e634] font-semibold">{title}</span>
+      <span className="text-[11px] uppercase tracking-wider text-[#6E54FF] font-semibold">{title}</span>
       {children}
     </div>
   );
@@ -160,7 +160,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex-1 rounded-xl bg-[#0a0a0f] border border-[#2a2a3a] px-3 py-2">
       <div className="text-[10px] uppercase tracking-wider text-gray-500">{label}</div>
-      <div className="text-base font-bold text-[#a2e634] tabular-nums truncate">{value}</div>
+      <div className="text-base font-bold text-[#6E54FF] tabular-nums truncate">{value}</div>
     </div>
   );
 }
