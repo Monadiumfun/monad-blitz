@@ -1,10 +1,13 @@
 import { useState, useCallback, useRef, useMemo } from 'react'
 import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
-import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
+import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
+import BetSelector from '../components/BetSelector'
+import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 
 interface LaserPartyProps {
   onBack: () => void
+  blitzBalance: number
 }
 
 type Phase = 'setup' | 'playing' | 'cashout' | 'bust'
@@ -19,8 +22,9 @@ const HOUSE_EDGE = 0.96
 const MAX_GRID_PX = 340
 const GAP = 4
 
-function LaserParty({ onBack }: LaserPartyProps) {
+function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
   const [phase, setPhase] = useState<Phase>('setup')
+  const [wager, setWager] = useState(() => clampWager(WAGER_DEFAULT, blitzBalance))
   const [gridSize, setGridSize] = useState(5)
   const [playerRow, setPlayerRow] = useState(-1)
   const [playerCol, setPlayerCol] = useState(-1)
@@ -105,47 +109,52 @@ function LaserParty({ onBack }: LaserPartyProps) {
       return
     }
 
-    const target = alive[Math.floor(Math.random() * alive.length)]
-    setLaserDim(dim)
-    setLaserIndex(target)
+    // The laser target is derived server-side from the committed seeds
+    // (provably fair); local random is only a degraded offline fallback.
+    void fetchOutcome(currentRound, { row: pRow, col: pCol }).then(o => {
+      const target = o?.target ?? alive[Math.floor(Math.random() * alive.length)]
+      const hit = o
+        ? o.hit
+        : (dim === 'row' && target === pRow) || (dim === 'col' && target === pCol)
 
-    timerRef.current = setTimeout(() => {
-      const hit =
-        (dim === 'row' && target === pRow) ||
-        (dim === 'col' && target === pCol)
+      setLaserDim(dim)
+      setLaserIndex(target)
 
-      setLaserDim(null)
-      setLaserIndex(-1)
-      setIsLasing(false)
+      timerRef.current = setTimeout(() => {
+        setLaserDim(null)
+        setLaserIndex(-1)
+        setIsLasing(false)
 
-      if (hit) {
-        sfxBust()
-        addScore('laser-party', currentMult, `${currentRound} rounds`)
-        if (dim === 'row') setDestroyedRows(prev => [...prev, target])
-        else setDestroyedCols(prev => [...prev, target])
-        settleOnChain(currentRound, 0)
-        setPhase('bust')
-      } else {
-        sfxCorrect()
-        if (dim === 'row') setDestroyedRows(prev => [...prev, target])
-        else setDestroyedCols(prev => [...prev, target])
+        if (hit) {
+          sfxBust()
+          addScore('laser-party', currentMult, `${currentRound} rounds`)
+          if (dim === 'row') setDestroyedRows(prev => [...prev, target])
+          else setDestroyedCols(prev => [...prev, target])
+          settleOnChain(currentRound, 0)
+          setPhase('bust')
+        } else {
+          sfxCorrect()
+          if (dim === 'row') setDestroyedRows(prev => [...prev, target])
+          else setDestroyedCols(prev => [...prev, target])
 
-        const remaining = alive.length
-        const roundMult = 1 / (1 - 1 / remaining)
-        const newMult = currentMult * roundMult * HOUSE_EDGE
-        setMultiplier(newMult)
-        setRound(currentRound + 1)
-        setLastSurvived(true)
+          const remaining = alive.length
+          const roundMult = 1 / (1 - 1 / remaining)
+          const newMult = o ? o.multiplier : currentMult * roundMult * HOUSE_EDGE
+          setMultiplier(newMult)
+          setRound(currentRound + 1)
+          setLastSurvived(true)
 
-        const newDRows = dim === 'row' ? [...dRows, target] : dRows
-        const newDCols = dim === 'col' ? [...dCols, target] : dCols
-        const totalDestroyed = newDRows.length + newDCols.length
-        if (totalDestroyed >= currentGrid * 2 - 2) {
-          setPhase('cashout')
+          const newDRows = dim === 'row' ? [...dRows, target] : dRows
+          const newDCols = dim === 'col' ? [...dCols, target] : dCols
+          const totalDestroyed = newDRows.length + newDCols.length
+          if (totalDestroyed >= currentGrid * 2 - 2) {
+            settleOnChain(currentRound + 1, newMult)
+            setPhase('cashout')
+          }
         }
-      }
-    }, 700)
-  }, [])
+      }, 700)
+    })
+  }, [settleOnChain])
 
   const [locked, setLocked] = useState(false)
 
@@ -154,6 +163,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
 
     sfxTap()
     setLocked(true)
+    recordChainMove(0, round + 1)
     setPlayerRow(row)
     setPlayerCol(col)
     setLastSurvived(false)
@@ -177,14 +187,15 @@ function LaserParty({ onBack }: LaserPartyProps) {
     setLaserDim(null)
     setLaserIndex(-1)
     setLastSurvived(false)
-    setChainGameId(null)
     setChainStatus('starting')
     setTxHash(null)
     setPhase('playing')
-    api.gameStart('laser-party')
-      .then(res => { setChainGameId(res.gameId); setChainStatus('live'); setTxHash(res.txHash) })
-      .catch(() => setChainStatus('error'))
-  }, [])
+    void startChainGame('laser-party', wager, { grid: size }).then(r => {
+      if (!r) return setChainStatus('error')
+      setChainStatus('live')
+      setTxHash(r.txHash)
+    })
+  }, [wager])
 
   if (phase === 'setup') {
     return (
@@ -209,12 +220,17 @@ function LaserParty({ onBack }: LaserPartyProps) {
             <p className="text-sm text-[#6b7280]">Tap a cell. Survive the laser. Repeat.</p>
           </div>
 
-          <div className="flex gap-3 justify-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <BetSelector balance={blitzBalance} value={wager} onChange={setWager} />
+          </div>
+
+          <div className="flex gap-3 justify-center animate-fade-in" style={{ animationDelay: '0.15s' }}>
             {GRID_OPTIONS.map(opt => (
               <button
                 key={opt.size}
                 onClick={() => handleSelectSize(opt.size)}
-                className="flex flex-col items-center gap-1 rounded-2xl border border-[#2a2a3a] bg-[#12121a] px-5 py-4 transition-all duration-150 hover:border-[#e74c3c] hover:bg-[#1a1a2e] active:scale-[0.95] flex-1"
+                disabled={maxAffordable(blitzBalance) < WAGER_MIN}
+                className="flex flex-col items-center gap-1 rounded-2xl border border-[#2a2a3a] bg-[#12121a] px-5 py-4 transition-all duration-150 hover:border-[#e74c3c] hover:bg-[#1a1a2e] active:scale-[0.95] flex-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2a2a3a]"
               >
                 <span className="text-xl font-mono font-bold text-white">{opt.label}</span>
                 <span className="text-xs text-[#6b7280]">{opt.desc}</span>

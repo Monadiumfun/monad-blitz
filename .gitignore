@@ -34,3 +34,4 @@ contracts/out/
 local.db
 local.db-*
 .vercel
+.env*.local
