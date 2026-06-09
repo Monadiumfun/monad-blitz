@@ -1,6 +1,7 @@
 import { useState, lazy, Suspense } from "react";
 import { api, type ApiUser } from "../lib/api";
 import { haptic, hapticTap } from "../lib/telegram";
+import BlitzLogo from "../components/BlitzLogo";
 
 const MonadGradientBackground = lazy(() => import("../components/MonadGradientBackground"));
 
@@ -55,7 +56,8 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
       </Suspense>
       <div className="relative z-10 w-full max-w-[420px] flex flex-col flex-1">
         <header className="text-center mb-8 mt-4">
-          <h1 className="text-3xl text-white brand">
+          <h1 className="text-3xl text-white brand flex items-center justify-center gap-1.5">
+            <BlitzLogo className="h-[0.82em] w-auto shrink-0 text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 8px rgba(110,84,255,0.6))" }} />
             Blitz
           </h1>
           <p className="text-sm text-gray-400 mt-2">

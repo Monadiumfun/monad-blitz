@@ -3,6 +3,7 @@ import type { GameId } from "../types";
 import type { ApiUser } from "../lib/api";
 import { hapticTap, openTelegramLink } from "../lib/telegram";
 import PixelCard from "./PixelCard";
+import BlitzLogo from "./BlitzLogo";
 
 interface GameHubProps {
   user: ApiUser;
@@ -64,7 +65,8 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
       <div className="w-full max-w-[420px] flex flex-col gap-5">
         <header className="flex items-center justify-between">
           <div className="flex flex-col">
-            <h1 className="text-2xl text-white brand leading-none">
+            <h1 className="text-2xl text-white brand leading-none flex items-center gap-1.5">
+              <BlitzLogo className="h-[0.82em] w-auto shrink-0 text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 6px rgba(110,84,255,0.6))" }} />
               Blitz
             </h1>
             <span className="text-xs text-gray-500 mt-1">@{user.username}</span>
