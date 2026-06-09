@@ -204,7 +204,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
           </div>
         </header>
 
-        <div className="flex-1 flex flex-col-reverse gap-1.5 py-2 overflow-y-auto max-h-[calc(100dvh-180px)]">
+        <div className="flex-1 flex flex-col-reverse gap-1.5 py-2 overflow-y-auto max-h-[calc(var(--tg-vh,100dvh)-180px)]">
           {Array.from({ length: totalVisible }, (_, rowIndex) => {
             const isCurrentRow = rowIndex === currentRow && isPlaying
             const isCompletedRow = rowIndex < picks.length

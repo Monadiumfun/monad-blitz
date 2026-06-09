@@ -35,7 +35,7 @@ function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#0a0a0f]">
+    <div className="min-h-[var(--tg-vh,100dvh)] bg-[#0a0a0f]">
       {/* top bar */}
       <header className="fixed top-0 inset-x-0 z-30 h-14 flex items-center justify-between px-4 border-b border-[#1a1a24] bg-[#0a0a0f]/90 backdrop-blur">
         <div className="flex items-center gap-1.5">
@@ -62,7 +62,7 @@ function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink
       </header>
 
       {/* content */}
-      <main className="pt-14 pb-[68px] min-h-[100dvh]">{children}</main>
+      <main className="pt-14 pb-[68px] min-h-[var(--tg-vh,100dvh)]">{children}</main>
 
       {/* bottom nav */}
       <nav className="fixed bottom-0 inset-x-0 z-30 h-[68px] grid grid-cols-3 border-t border-[#1a1a24] bg-[#0a0a0f]/95 backdrop-blur">
