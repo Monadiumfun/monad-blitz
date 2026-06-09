@@ -41,6 +41,25 @@ function App() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Keep the balance live: poll the lightweight /api/balance while a user is
+  // active (the fast RPC pool makes this cheap), so wins/funding show quickly.
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    const tick = () =>
+      api
+        .balance()
+        .then((r) => {
+          if (alive) setUser((u) => (u ? { ...u, balances: r.balances } : u));
+        })
+        .catch(() => {});
+    const id = setInterval(tick, 5000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [user?.telegramId]);
+
   // Return to the hub and refresh the referral count.
   function backToHub() {
     setScreen({ name: "hub" });
@@ -109,11 +128,11 @@ function App() {
 function Splash({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center justify-center gap-4">
-      <h1 className="text-3xl text-white brand animate-pulse flex items-center justify-center gap-1.5">
+      <h1 className="text-3xl text-white brand flex items-center justify-center gap-1.5">
         <BlitzLogo className="h-[0.82em] w-auto shrink-0 text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 8px rgba(110,84,255,0.6))" }} />
         Blitz
       </h1>
-      {children}
+      {children ?? <span className="loader-ring" style={{ width: 22, height: 22, borderWidth: 3 }} />}
     </div>
   );
 }

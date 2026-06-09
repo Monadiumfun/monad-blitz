@@ -21,7 +21,6 @@ function fmt(n: number): string {
 function SharePnL({ game, emoji, multiplier, wager }: Props) {
   const user = useUser();
   const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const payout = wager * multiplier;
@@ -51,32 +50,12 @@ function SharePnL({ game, emoji, multiplier, wager }: Props) {
     };
   }, [open, emoji, game, payout, multiplier, username, refCode, referralLink]);
 
-  async function share() {
-    const canvas = canvasRef.current;
-    if (!canvas || busy) return;
-    setBusy(true);
+  // Share to Telegram only (same flow as the referral-code share): opens the
+  // Telegram share sheet with the win text + the referral link.
+  function share() {
     hapticTap();
     const text = `I just won ${fmt(payout)} $BLITZ on ${game} (${multiplier.toFixed(2)}×) 🎮\nPlay on Monad — use my code "${refCode}":`;
-    try {
-      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
-      const file = blob ? new File([blob], "blitz-win.png", { type: "image/png" }) : null;
-      if (file && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], text });
-      } else {
-        // fallback: download the image + share the referral link on Telegram
-        if (blob) {
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = "blitz-win.png";
-          a.click();
-        }
-        openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`);
-      }
-    } catch {
-      /* user cancelled share */
-    } finally {
-      setBusy(false);
-    }
+    openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`);
   }
 
   return (
@@ -102,10 +81,9 @@ function SharePnL({ game, emoji, multiplier, wager }: Props) {
           <div className="flex gap-2 w-[min(86vw,320px)]">
             <button
               onClick={share}
-              disabled={busy}
               className="flex-1 py-3 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97] transition"
             >
-              {busy ? "…" : "Share"}
+              Share on Telegram
             </button>
             <button
               onClick={() => setOpen(false)}
