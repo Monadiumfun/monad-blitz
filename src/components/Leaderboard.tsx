@@ -46,7 +46,7 @@ function Leaderboard({ onBack }: Props) {
                 <div
                   key={`${row.rank}-${row.username}`}
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 border ${
-                    isMe ? "border-[#a2e634]/50 bg-[#a2e634]/[0.07]" : "border-[#2a2a3a] bg-[#12121a]"
+                    isMe ? "border-[#6E54FF]/50 bg-[#6E54FF]/[0.07]" : "border-[#2a2a3a] bg-[#12121a]"
                   }`}
                 >
                   <span className={`w-9 text-center font-bold ${row.rank <= 3 ? "text-lg" : "text-sm text-gray-400"}`}>
@@ -54,9 +54,9 @@ function Leaderboard({ onBack }: Props) {
                   </span>
                   <span className="flex-1 font-semibold text-white truncate">
                     {row.username}
-                    {isMe && <span className="ml-2 text-[10px] uppercase tracking-wide text-[#a2e634]">you</span>}
+                    {isMe && <span className="ml-2 text-[10px] uppercase tracking-wide text-[#6E54FF]">you</span>}
                   </span>
-                  <span className="text-[#a2e634] font-bold tabular-nums">{row.referrals}</span>
+                  <span className="text-[#6E54FF] font-bold tabular-nums">{row.referrals}</span>
                   <span className="text-[10px] text-gray-500 uppercase">refs</span>
                 </div>
               );
@@ -65,13 +65,13 @@ function Leaderboard({ onBack }: Props) {
         )}
 
         {!loading && data?.me && data.me.rank > data.leaders.length && (
-          <div className="flex items-center gap-3 rounded-xl px-4 py-3 border border-[#a2e634]/50 bg-[#a2e634]/[0.07] mt-2">
+          <div className="flex items-center gap-3 rounded-xl px-4 py-3 border border-[#6E54FF]/50 bg-[#6E54FF]/[0.07] mt-2">
             <span className="w-9 text-center font-bold text-sm text-gray-400">#{data.me.rank}</span>
             <span className="flex-1 font-semibold text-white truncate">
               {data.me.username}
-              <span className="ml-2 text-[10px] uppercase tracking-wide text-[#a2e634]">you</span>
+              <span className="ml-2 text-[10px] uppercase tracking-wide text-[#6E54FF]">you</span>
             </span>
-            <span className="text-[#a2e634] font-bold tabular-nums">{data.me.referrals}</span>
+            <span className="text-[#6E54FF] font-bold tabular-nums">{data.me.referrals}</span>
             <span className="text-[10px] text-gray-500 uppercase">refs</span>
           </div>
         )}

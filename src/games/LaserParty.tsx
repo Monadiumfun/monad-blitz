@@ -246,20 +246,20 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-3">
         <div className="flex flex-col items-center gap-5 rounded-2xl border border-[#2a2a3a] bg-[#12121a] px-8 py-10 w-[320px] animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-[#a2e63420] flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-[#6E54FF20] flex items-center justify-center">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <path d="M5 13l4 4L19 7" stroke="#a2e634" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M5 13l4 4L19 7" stroke="#6E54FF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <h2 className="text-xl font-bold text-white">Cashed Out!</h2>
           <div className="flex flex-col items-center gap-1">
             <span className="text-sm text-[#6b7280]">Survived {round} rounds</span>
-            <span className="text-4xl font-mono font-bold text-[#a2e634] animate-count-up">
+            <span className="text-4xl font-mono font-bold text-[#6E54FF] animate-count-up">
               {multiplier.toFixed(2)}x
             </span>
           </div>
           <div className="flex flex-col gap-2.5 w-full mt-2">
-            <button onClick={reset} className="w-full py-3 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97]">
+            <button onClick={reset} className="w-full py-3 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97]">
               Play Again
             </button>
             <button onClick={onBack} className="w-full py-3 rounded-xl border border-[#2a2a3a] text-[#6b7280] font-bold text-sm hover:text-white active:scale-[0.97]">
@@ -310,7 +310,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
           </button>
           <div className="flex flex-col items-center">
             <span className="text-xs text-[#6b7280] uppercase tracking-wide">Round {round + 1}</span>
-            <span className="text-2xl font-mono font-bold text-[#a2e634]">{multiplier.toFixed(2)}x</span>
+            <span className="text-2xl font-mono font-bold text-[#6E54FF]">{multiplier.toFixed(2)}x</span>
           </div>
           {round > 0 && !isLasing ? (
             <button
@@ -320,7 +320,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
                 settleOnChain(round, multiplier)
                 setPhase('cashout')
               }}
-              className="px-4 py-2 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-xs animate-pulse-green active:scale-[0.95]"
+              className="px-4 py-2 rounded-xl bg-[#6E54FF] text-white font-bold text-xs animate-pulse-green active:scale-[0.95]"
             >
               CASH OUT
             </button>
@@ -331,10 +331,10 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
 
         <div className="text-center mb-2">
           {playerRow < 0 && !isLasing && (
-            <span className="text-sm text-[#a2e634] font-semibold animate-fade-in">TAP A CELL</span>
+            <span className="text-sm text-[#6E54FF] font-semibold animate-fade-in">TAP A CELL</span>
           )}
           {lastSurvived && !isLasing && (
-            <span className="text-sm text-[#a2e634] font-semibold animate-fade-in">SURVIVED! TAP TO MOVE</span>
+            <span className="text-sm text-[#6E54FF] font-semibold animate-fade-in">SURVIVED! TAP TO MOVE</span>
           )}
           {isLasing && (
             <span className="text-sm text-[#e74c3c] font-bold animate-fade-in">
@@ -381,15 +381,15 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
                       backgroundColor: isBeingLased
                         ? '#e74c3c60'
                         : isPlayer
-                          ? '#a2e63430'
+                          ? '#6E54FF30'
                           : '#1a1a2e',
                       borderColor: isBeingLased
                         ? '#e74c3c'
                         : isPlayer
-                          ? '#a2e634'
+                          ? '#6E54FF'
                           : '#2a2a3a',
                       boxShadow: isPlayer && !isBeingLased
-                        ? '0 0 14px rgba(162, 230, 52, 0.4)'
+                        ? '0 0 14px rgba(110, 84, 255, 0.4)'
                         : isBeingLased
                           ? '0 0 12px rgba(231, 76, 60, 0.4)'
                           : 'none',
@@ -398,7 +398,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
                     {isPlayer && (
                       <div className="w-full h-full flex items-center justify-center">
                         <div
-                          className="rounded-full bg-[#a2e634]"
+                          className="rounded-full bg-[#6E54FF]"
                           style={{
                             width: cellSize * 0.35,
                             height: cellSize * 0.35,
@@ -454,8 +454,8 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
             <span className="text-[10px] text-[#6b7280]">Starting on-chain...</span>
           )}
           {chainStatus === 'live' && (
-            <span className="text-[10px] text-[#a2e634] flex items-center justify-center gap-1">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#a2e634]" />
+            <span className="text-[10px] text-[#6E54FF] flex items-center justify-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#6E54FF]" />
               On-chain
             </span>
           )}

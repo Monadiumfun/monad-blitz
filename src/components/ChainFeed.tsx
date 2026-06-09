@@ -24,7 +24,7 @@ function ChainFeed() {
               tx.status === 'pending'
                 ? 'bg-[#ffb347] animate-pulse'
                 : tx.status === 'confirmed'
-                  ? 'bg-[#a2e634]'
+                  ? 'bg-[#6E54FF]'
                   : 'bg-[#e74c3c]'
             }`}
           />
