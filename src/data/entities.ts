@@ -283,6 +283,77 @@ export const entities: Entity[] = [
   { name: 'Polygon', category: 'monad', metric: 'block_time', metricLabel: 'Block Time (s)', value: 2, emoji: '⬟' },
   { name: 'Ethereum', category: 'monad', metric: 'block_time', metricLabel: 'Block Time (s)', value: 12, emoji: '⟠' },
   { name: 'Bitcoin', category: 'monad', metric: 'block_time', metricLabel: 'Block Time (s)', value: 600, emoji: '₿' },
+
+  // ============================================================
+  // CRYPTO - Memecoins on Monad (market cap in millions USD)
+  // ============================================================
+  { name: 'CHOG', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 3, emoji: '🐸' },
+  { name: 'Molandak (DAK)', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 2.1, emoji: '🦡' },
+  { name: 'Moyaki (YAKI)', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 1.5, emoji: '🔥' },
+  { name: 'Salmonad', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 0.8, emoji: '🐟' },
+  { name: 'Mouch', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 0.4, emoji: '🪰' },
+  { name: 'Moncock', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 1.2, emoji: '🐓' },
+  { name: 'Spidermon', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 0.3, emoji: '🕷' },
+  { name: 'Purple Pepe', category: 'crypto', metric: 'market_cap_meme', metricLabel: 'Market Cap ($M)', value: 0.5, emoji: '🟣' },
+
+  // ============================================================
+  // CULTURE - Internet memes (Google Trends peak interest score, 0-100)
+  // ============================================================
+  { name: 'Doge', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 100, emoji: '🐕' },
+  { name: 'Pepe the Frog', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 75, emoji: '🐸' },
+  { name: 'Rickroll', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 82, emoji: '🎵' },
+  { name: 'Nyan Cat', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 68, emoji: '🌈' },
+  { name: 'Distracted Boyfriend', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 55, emoji: '👀' },
+  { name: 'Drake Hotline Bling', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 60, emoji: '🎧' },
+  { name: 'This Is Fine', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 42, emoji: '🔥' },
+  { name: 'Grumpy Cat', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 90, emoji: '🐱' },
+  { name: 'Wojak', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 38, emoji: '😐' },
+  { name: 'Gigachad', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 65, emoji: '💪' },
+  { name: 'Woman Yelling at Cat', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 58, emoji: '🐱' },
+  { name: 'Success Kid', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 45, emoji: '👶' },
+  { name: 'Bad Luck Brian', category: 'culture', metric: 'meme_popularity', metricLabel: 'Google Trends Score', value: 52, emoji: '😬' },
+
+  // ============================================================
+  // CULTURE - Adult stars (Pornhub annual search ranking score)
+  // ============================================================
+  { name: 'Alex Adams', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 100, emoji: '🔞' },
+  { name: 'Angela White', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 95, emoji: '🔞' },
+  { name: 'Violet Myers', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 88, emoji: '🔞' },
+  { name: 'Bonnie Blue', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 84, emoji: '🔞' },
+  { name: 'Lana Rhoades', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 80, emoji: '🔞' },
+  { name: 'Lily Phillips', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 76, emoji: '🔞' },
+  { name: 'Mia Khalifa', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 72, emoji: '🔞' },
+  { name: 'Riley Reid', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 68, emoji: '🔞' },
+  { name: 'Abella Danger', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 65, emoji: '🔞' },
+  { name: 'Eva Elfie', category: 'culture', metric: 'ph_searches', metricLabel: 'PH Search Rank Score', value: 62, emoji: '🔞' },
+
+  // ============================================================
+  // CULTURE - Drugs (users worldwide in millions)
+  // ============================================================
+  { name: 'Caffeine', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 5000, emoji: '☕' },
+  { name: 'Alcohol', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 2000, emoji: '🍺' },
+  { name: 'Nicotine', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 1200, emoji: '🚬' },
+  { name: 'Cannabis', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 244, emoji: '🌿' },
+  { name: 'Opioids', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 61, emoji: '💊' },
+  { name: 'Amphetamines', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 31, emoji: '⚡' },
+  { name: 'Cocaine', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 25, emoji: '❄' },
+  { name: 'MDMA / Ecstasy', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 21, emoji: '💎' },
+  { name: 'Kratom', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 15, emoji: '🍃' },
+  { name: 'Psilocybin', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 36, emoji: '🍄' },
+  { name: 'LSD', category: 'culture', metric: 'drug_users', metricLabel: 'Users Worldwide (M)', value: 10, emoji: '🌀' },
+
+  // ============================================================
+  // CULTURE - Twitch streamers (followers in millions)
+  // ============================================================
+  { name: 'Kai Cenat', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 20, emoji: '🎮' },
+  { name: 'Ibai', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 19.8, emoji: '🇪🇸' },
+  { name: 'Ninja', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 19, emoji: '🥷' },
+  { name: 'Auronplay', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 17, emoji: '🇪🇸' },
+  { name: 'Rubius', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 17.3, emoji: '🎬' },
+  { name: 'xQc', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 12.2, emoji: '🇨🇦' },
+  { name: 'Tfue', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 11.3, emoji: '🎯' },
+  { name: 'Shroud', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 11, emoji: '🔫' },
+  { name: 'Pokimane', category: 'culture', metric: 'twitch', metricLabel: 'Twitch Followers (M)', value: 9.4, emoji: '🎀' },
 ]
 
 export function getRandomPair(sameCategoryOnly = true): [Entity, Entity] {
