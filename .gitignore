@@ -29,3 +29,8 @@ dist-ssr
 !.env.example
 contracts/cache/
 contracts/out/
+
+# local libsql db
+local.db
+local.db-*
+.vercel
