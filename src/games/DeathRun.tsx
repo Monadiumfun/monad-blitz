@@ -3,6 +3,7 @@ import { sfxTap, sfxCorrect, sfxBust, sfxCashout, sfxSuspense } from '../lib/sou
 import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
+import SharePnL from '../components/SharePnL'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 
 interface DeathRunProps {
@@ -386,6 +387,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
               <span className="text-xl font-bold text-[#6E54FF]">CASHED OUT</span>
               <span className="text-lg font-mono font-bold text-[#6E54FF] ml-2 animate-count-up">{multiplier.toFixed(2)}x</span>
             </div>
+            <SharePnL game="Death Run" emoji="💀" multiplier={multiplier} wager={wager} />
             <div className="flex gap-2">
               <button
                 onClick={handlePlayAgain}

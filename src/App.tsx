@@ -9,6 +9,7 @@ import DeathRun from "./games/DeathRun";
 import type { GameId } from "./types";
 import { api, type ApiUser } from "./lib/api";
 import { initTelegram } from "./lib/telegram";
+import { UserContext } from "./lib/userContext";
 
 type Screen = { name: "hub" } | { name: "game"; game: GameId } | { name: "leaderboard" };
 
@@ -88,10 +89,10 @@ function App() {
       screen.game === "laser-party" ? <LaserParty onBack={backToHub} blitzBalance={blitzBalance} /> :
       <DeathRun onBack={backToHub} blitzBalance={blitzBalance} />;
     return (
-      <>
+      <UserContext.Provider value={user}>
         {game}
         <ChainFeed />
-      </>
+      </UserContext.Provider>
     );
   }
 
