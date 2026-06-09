@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from 'react'
 import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
+import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
 
 interface LaserPartyProps {
   onBack: () => void
@@ -31,7 +32,18 @@ function LaserParty({ onBack }: LaserPartyProps) {
   const [laserDim, setLaserDim] = useState<'row' | 'col' | null>(null)
   const [laserIndex, setLaserIndex] = useState(-1)
   const [lastSurvived, setLastSurvived] = useState(false)
+  const [chainStatus, setChainStatus] = useState<'idle' | 'starting' | 'live' | 'settling' | 'settled' | 'error'>('idle')
+  const [txHash, setTxHash] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const settleOnChain = useCallback((score: number, mult: number) => {
+    setChainStatus('settling')
+    void endChainGame(score, mult).then(r => {
+      if (!r) return setChainStatus('error')
+      setTxHash(r.txHash)
+      setChainStatus('settled')
+    })
+  }, [])
 
   const aliveRows = useMemo(
     () => Array.from({ length: gridSize }, (_, i) => i).filter(i => !destroyedRows.includes(i)),
@@ -61,6 +73,8 @@ function LaserParty({ onBack }: LaserPartyProps) {
     setLaserDim(null)
     setLaserIndex(-1)
     setLastSurvived(false)
+    setChainStatus('idle')
+    setTxHash(null)
   }, [])
 
   const fireLaser = useCallback((
@@ -86,6 +100,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
     }
 
     if (alive.length === 0) {
+      settleOnChain(currentRound, currentMult)
       setPhase('cashout')
       return
     }
@@ -108,6 +123,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
         addScore('laser-party', currentMult, `${currentRound} rounds`)
         if (dim === 'row') setDestroyedRows(prev => [...prev, target])
         else setDestroyedCols(prev => [...prev, target])
+        settleOnChain(currentRound, 0)
         setPhase('bust')
       } else {
         sfxCorrect()
@@ -161,7 +177,13 @@ function LaserParty({ onBack }: LaserPartyProps) {
     setLaserDim(null)
     setLaserIndex(-1)
     setLastSurvived(false)
+    setChainGameId(null)
+    setChainStatus('starting')
+    setTxHash(null)
     setPhase('playing')
+    api.gameStart('laser-party')
+      .then(res => { setChainGameId(res.gameId); setChainStatus('live'); setTxHash(res.txHash) })
+      .catch(() => setChainStatus('error'))
   }, [])
 
   if (phase === 'setup') {
@@ -276,7 +298,12 @@ function LaserParty({ onBack }: LaserPartyProps) {
           </div>
           {round > 0 && !isLasing ? (
             <button
-              onClick={() => { sfxCashout(); addScore('laser-party', multiplier, `${round} rounds`); setPhase('cashout') }}
+              onClick={() => {
+                sfxCashout()
+                addScore('laser-party', multiplier, `${round} rounds`)
+                settleOnChain(round, multiplier)
+                setPhase('cashout')
+              }}
               className="px-4 py-2 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-xs animate-pulse-green active:scale-[0.95]"
             >
               CASH OUT
@@ -405,6 +432,33 @@ function LaserParty({ onBack }: LaserPartyProps) {
           <span className="text-xs text-[#6b7280]">
             {round % 2 === 0 ? 'Column' : 'Row'} laser next
           </span>
+        </div>
+        <div className="text-center mb-1">
+          {chainStatus === 'starting' && (
+            <span className="text-[10px] text-[#6b7280]">Starting on-chain...</span>
+          )}
+          {chainStatus === 'live' && (
+            <span className="text-[10px] text-[#a2e634] flex items-center justify-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#a2e634]" />
+              On-chain
+            </span>
+          )}
+          {chainStatus === 'settling' && (
+            <span className="text-[10px] text-[#6b7280]">Settling...</span>
+          )}
+          {chainStatus === 'settled' && txHash && (
+            <a
+              href={`https://testnet.monadscan.com/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-[#6b7280] hover:text-white"
+            >
+              Settled {txHash.slice(0, 6)}...{txHash.slice(-4)}
+            </a>
+          )}
+          {chainStatus === 'error' && (
+            <span className="text-[10px] text-[#4a4a5a]">Off-chain</span>
+          )}
         </div>
       </div>
     </div>
