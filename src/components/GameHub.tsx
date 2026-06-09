@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { GameId } from "../types";
 import type { ApiUser } from "../lib/api";
 import { hapticTap, openTelegramLink } from "../lib/telegram";
+import PixelCard from "./PixelCard";
 
 interface GameHubProps {
   user: ApiUser;
@@ -112,12 +113,11 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
 
         <div className="flex flex-col gap-4">
           {games.map((game) => (
-            <div
+            <PixelCard
               key={game.id}
-              className="animate-fade-in relative overflow-hidden rounded-2xl border border-[#2a2a3a] bg-gradient-to-br from-[#12121c] to-[#0e0e18] p-5 transition-all duration-200 hover:border-[#a2e634]/40 hover:shadow-[0_0_24px_rgba(162,230,52,0.08)]"
+              className="animate-fade-in rounded-2xl border border-[#2a2a3a] bg-gradient-to-br from-[#12121c] to-[#0e0e18] p-5 transition-all duration-200 hover:border-[#6E54FF]/50 hover:shadow-[0_0_24px_rgba(110,84,255,0.12)]"
               style={{ animationDelay: game.delay }}
             >
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#a2e634]/[0.03] to-transparent pointer-events-none" />
               <div className="relative flex items-start gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1a1a24] text-2xl">
                   {game.emoji}
@@ -136,7 +136,7 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
               >
                 Play
               </button>
-            </div>
+            </PixelCard>
           ))}
         </div>
 
