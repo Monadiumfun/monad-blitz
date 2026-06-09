@@ -5,7 +5,7 @@ import { fundNewUser } from "./_lib/chain.ts";
 import type { Hex } from "viem";
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
-const RESERVED = new Set(["admin", "monad", "blitz", "nadgames", "support", "null", "undefined"]);
+const RESERVED = new Set(["admin", "monad", "blitz", "blitzgames", "support", "null", "undefined"]);
 
 export default async function handler(req: Req, res: Res) {
   applyCors(res);

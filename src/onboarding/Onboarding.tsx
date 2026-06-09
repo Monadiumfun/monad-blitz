@@ -51,7 +51,7 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
       <div className="w-full max-w-[420px] flex flex-col flex-1">
         <header className="text-center mb-8 mt-4">
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            Nad<span className="text-[#a2e634]">Games</span>
+            Blitz<span className="text-[#a2e634]">Games</span>
           </h1>
           <p className="text-sm text-gray-400 mt-2">
             {step === "username"
