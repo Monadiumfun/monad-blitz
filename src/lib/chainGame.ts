@@ -37,7 +37,7 @@ function randomClientSeed(): string {
 export function startChainGame(
   game: GameId,
   wager?: number,
-  config?: { tiles?: number; grid?: number },
+  config?: { tiles?: number; grid?: number; tilesSeq?: number[] },
 ): Promise<StartResult | null> {
   if (session?.game === game) return session.promise
   const t = trackTx('Start game')

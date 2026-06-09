@@ -21,17 +21,25 @@ export default async function handler(req: Req, res: Res) {
     game?: string;
     wager?: number;
     clientSeed?: string;
-    config?: { tiles?: number; grid?: number };
+    config?: { tiles?: number; grid?: number; tilesSeq?: number[] };
   }>(req);
   const game = String(body.game ?? "");
   const gameType = GAME_TYPES[game];
   if (gameType === undefined) return sendJson(res, 400, { error: "invalid_game" });
 
   const clientSeed = String(body.clientSeed ?? "").slice(0, 66);
-  const config = JSON.stringify({
+  // death-run uses a per-row tile-count sequence (rows of 7..2 tiles); each
+  // row's mine is keyed on its row id, so the play order can be shuffled freely.
+  const tilesSeq = (Array.isArray(body.config?.tilesSeq) ? body.config!.tilesSeq! : [])
+    .map((n) => Math.min(7, Math.max(2, Math.floor(Number(n)))))
+    .filter((n) => Number.isFinite(n))
+    .slice(0, 12);
+  const configObj: Record<string, unknown> = {
     tiles: Math.min(8, Math.max(2, Math.floor(Number(body.config?.tiles ?? 2)))),
     grid: Math.min(12, Math.max(3, Math.floor(Number(body.config?.grid ?? 5)))),
-  });
+  };
+  if (tilesSeq.length) configObj.tilesSeq = tilesSeq;
+  const config = JSON.stringify(configObj);
 
   const wagerMin = parseEther(process.env.GAME_WAGER_MIN || "10");
   const wagerMax = parseEther(process.env.GAME_WAGER_MAX || "1000");
