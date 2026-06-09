@@ -47,7 +47,14 @@ export function authenticate(req: Req): VerifiedInit | null {
     const v = verifyInitData(initData, token);
     if (v) return v;
   }
-  if (process.env.ALLOW_DEV_AUTH === "1") {
+  // Dev-only impersonation bypass for browser testing without Telegram.
+  // SECURITY: disabled unless a server-side DEV_AUTH_SECRET is set AND the
+  // request carries the matching x-dev-secret. In production DEV_AUTH_SECRET is
+  // unset, so the ONLY accepted auth is a valid Telegram initData signature —
+  // an account can only ever be acted on by its own telegram_id. Without this
+  // gate, anyone could send `x-dev-user: <victim_id>` and take over an account.
+  const devSecret = process.env.DEV_AUTH_SECRET;
+  if (devSecret && header(req, "x-dev-secret") === devSecret) {
     const dev = header(req, "x-dev-user");
     if (dev) {
       const [idStr, ...rest] = dev.split(":");
@@ -72,6 +79,6 @@ function header(req: Req, name: string): string | null {
 /** Standard CORS for the mini app (same-origin in prod, permissive for dev). */
 export function applyCors(res: Res): void {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "content-type, x-init-data, x-dev-user, x-dev-start");
+  res.setHeader("Access-Control-Allow-Headers", "content-type, x-init-data, x-dev-user, x-dev-start, x-dev-secret");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 }

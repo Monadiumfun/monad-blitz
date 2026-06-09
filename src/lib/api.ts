@@ -28,13 +28,17 @@ export interface LeaderboardResponse {
 function devHeaders(): Record<string, string> {
   if (import.meta.env.PROD) return {};
   if (getInitData()) return {};
+  // dev impersonation is opt-in and gated by a secret shared with the server;
+  // without VITE_DEV_AUTH_SECRET we send nothing (real Telegram auth only).
+  const secret = import.meta.env.VITE_DEV_AUTH_SECRET as string | undefined;
+  if (!secret) return {};
   let id = localStorage.getItem("dev_uid");
   if (!id) {
     id = String(100000 + Math.floor(Math.random() * 900000));
     localStorage.setItem("dev_uid", id);
   }
   const start = new URLSearchParams(window.location.search).get("ref");
-  const h: Record<string, string> = { "x-dev-user": `${id}:Player${id}` };
+  const h: Record<string, string> = { "x-dev-user": `${id}:Player${id}`, "x-dev-secret": secret };
   if (start) h["x-dev-start"] = start;
   return h;
 }
