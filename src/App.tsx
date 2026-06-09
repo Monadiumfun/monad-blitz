@@ -100,7 +100,7 @@ function App() {
 
   if (!user) return <Splash />;
 
-  if (screen.name === "leaderboard") return <Leaderboard onBack={backToHub} />;
+  if (screen.name === "leaderboard") return <Leaderboard onBack={backToHub} user={user} />;
 
   if (screen.name === "game") {
     const blitzBalance = Number(user.balances?.blitz ?? 0);
