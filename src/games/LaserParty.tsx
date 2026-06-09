@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
 import SharePnL from '../components/SharePnL'
+import BlitzLogo from '../components/BlitzLogo'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
 
 interface LaserPartyProps {
@@ -20,13 +21,42 @@ const GRID_OPTIONS = [
 ]
 
 const HOUSE_EDGE = 0.96
-const MAX_GRID_PX = 340
+const GRID_CAP_PX = 340
 const GAP = 4
+
+// Largest grid that fits the current mini-app window minus padding.
+function fitGridPx(): number {
+  const w = typeof window !== 'undefined' ? window.innerWidth : 360
+  return Math.min(GRID_CAP_PX, w - 28)
+}
+
+// Cumulative multiplier after each survived round, for the top progress track.
+function laserLadder(gridSize: number): number[] {
+  const ladder = [1]
+  let mult = 1
+  let dRows = 0
+  let dCols = 0
+  for (let r = 0; r < gridSize * 2 - 2; r++) {
+    const isCol = r % 2 === 0
+    const alive = isCol ? gridSize - dCols : gridSize - dRows
+    if (alive <= 1) break
+    mult *= (1 / (1 - 1 / alive)) * HOUSE_EDGE
+    if (isCol) dCols++; else dRows++
+    ladder.push(mult)
+  }
+  return ladder
+}
 
 function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
   const [phase, setPhase] = useState<Phase>('setup')
   const [wager, setWager] = useState(() => clampWager(WAGER_DEFAULT, blitzBalance))
   const [gridSize, setGridSize] = useState(5)
+  const [maxGridPx, setMaxGridPx] = useState(fitGridPx)
+  useEffect(() => {
+    const onResize = () => setMaxGridPx(fitGridPx())
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   const [playerRow, setPlayerRow] = useState(-1)
   const [playerCol, setPlayerCol] = useState(-1)
   const [destroyedRows, setDestroyedRows] = useState<number[]>([])
@@ -61,8 +91,10 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
 
   const cellSize = useMemo(() => {
     const maxDim = Math.max(aliveRows.length, aliveCols.length, 1)
-    return Math.min(Math.floor((MAX_GRID_PX - (maxDim - 1) * GAP) / maxDim), 72)
-  }, [aliveRows.length, aliveCols.length])
+    return Math.min(Math.floor((maxGridPx - (maxDim - 1) * GAP) / maxDim), 72)
+  }, [aliveRows.length, aliveCols.length, maxGridPx])
+
+  const ladder = useMemo(() => laserLadder(gridSize), [gridSize])
 
   const reset = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
@@ -331,6 +363,38 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
           )}
         </header>
 
+        {/* multiplier progress track */}
+        <div className="mb-3 px-1">
+          <div className="relative h-3 mb-1">
+            {ladder.map((m, i) => {
+              if (ladder.length > 1 && i !== 0 && i !== ladder.length - 1 && i % Math.ceil(ladder.length / 5) !== 0) return null
+              return (
+                <span
+                  key={i}
+                  className="absolute -translate-x-1/2 text-[9px] font-mono text-[#8898a8] whitespace-nowrap"
+                  style={{ left: `${ladder.length > 1 ? (i / (ladder.length - 1)) * 100 : 0}%` }}
+                >
+                  {m < 10 ? m.toFixed(2) : m.toFixed(1)}x
+                </span>
+              )
+            })}
+          </div>
+          <div className="relative h-2 flex items-center">
+            <div className="absolute inset-x-0 h-[3px] rounded-full bg-[#2a1414]" />
+            <div
+              className="absolute left-0 h-[3px] rounded-full bg-[#6E54FF] transition-[width] duration-300"
+              style={{ width: `${ladder.length > 1 ? (Math.min(round, ladder.length - 1) / (ladder.length - 1)) * 100 : 0}%` }}
+            />
+            {ladder.map((_, i) => (
+              <div
+                key={i}
+                className={`absolute w-[2px] h-2 -translate-x-1/2 rounded ${i <= round ? 'bg-[#6E54FF]' : 'bg-[#3a2222]'}`}
+                style={{ left: `${ladder.length > 1 ? (i / (ladder.length - 1)) * 100 : 0}%` }}
+              />
+            ))}
+          </div>
+        </div>
+
         <div className="text-center mb-2">
           {playerRow < 0 && !isLasing && (
             <span className="text-sm text-[#6E54FF] font-semibold animate-fade-in">TAP A CELL</span>
@@ -384,12 +448,12 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
                         ? '#e74c3c60'
                         : isPlayer
                           ? '#6E54FF30'
-                          : '#1a1a2e',
+                          : '#160606',
                       borderColor: isBeingLased
-                        ? '#e74c3c'
+                        ? '#ff5b4d'
                         : isPlayer
                           ? '#6E54FF'
-                          : '#2a2a3a',
+                          : '#e0564e',
                       boxShadow: isPlayer && !isBeingLased
                         ? '0 0 14px rgba(110, 84, 255, 0.4)'
                         : isBeingLased
@@ -399,12 +463,13 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
                   >
                     {isPlayer && (
                       <div className="w-full h-full flex items-center justify-center">
-                        <div
-                          className="rounded-full bg-[#6E54FF]"
+                        <BlitzLogo
+                          className="text-[#6E54FF]"
                           style={{
-                            width: cellSize * 0.35,
-                            height: cellSize * 0.35,
-                            transition: 'width 0.5s ease, height 0.5s ease',
+                            height: cellSize * 0.58,
+                            width: 'auto',
+                            transition: 'height 0.5s ease',
+                            filter: 'drop-shadow(0 0 6px rgba(110, 84, 255, 0.7))',
                           }}
                         />
                       </div>
