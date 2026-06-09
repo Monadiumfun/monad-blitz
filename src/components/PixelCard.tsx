@@ -65,11 +65,13 @@ interface Props {
 }
 
 function PixelCard({
-  colors = "#6E54FF,#9751DC,#A78BFA,#452890,#CEBDE4",
-  gap = 6,
+  // same spectral palette as the background shader (indigo → blue → magenta →
+  // rose → orange → gold)
+  colors = "#4d3ae6,#9e40cc,#e04d73,#ee9e4d,#f7cc73,#241a85",
+  gap = 10,
   spreadDuration = 400,
   speed = 0.15,
-  maxSize = 2,
+  maxSize = 5,
   className,
   style,
   children,
@@ -142,7 +144,7 @@ function PixelCard({
 
     const toggle = (show: boolean) => {
       for (const p of pixelsRef.current) {
-        p.setTarget(show ? 1 + Math.random() * 0.8 : 0, delayFor(p.x, p.y));
+        p.setTarget(show ? maxSize * (0.55 + Math.random() * 0.4) : 0, delayFor(p.x, p.y));
       }
       animate();
     };
