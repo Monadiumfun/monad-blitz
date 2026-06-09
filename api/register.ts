@@ -79,7 +79,7 @@ export default async function handler(req: Req, res: Res) {
       referrals: 0,
       walletAddress,
       funded,
-      referralLink: `https://t.me/${botUsername}?startapp=${user.ref_code}`,
+      referralLink: `https://t.me/${botUsername}?start=${user.ref_code}`,
     },
   });
 }
