@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { api, type LeaderboardResponse } from "../lib/api";
+import { api, type LeaderboardResponse, type ApiUser } from "../lib/api";
+import InviteCard from "./InviteCard";
 
 interface Props {
   onBack: () => void;
+  user?: ApiUser | null;
 }
 
-function Leaderboard({ onBack }: Props) {
+function Leaderboard({ onBack, user }: Props) {
   const [data, setData] = useState<LeaderboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +33,8 @@ function Leaderboard({ onBack }: Props) {
           <h1 className="text-lg font-bold text-white">🏆 Referral Leaders</h1>
           <div className="w-[44px]" />
         </header>
+
+        {user && <InviteCard refCode={user.refCode} referralLink={user.referralLink} />}
 
         {loading && <p className="text-center text-gray-500 text-sm mt-8">Loading…</p>}
 

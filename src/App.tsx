@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
-import GameHub from "./components/GameHub";
+import AppShell, { type Tab } from "./components/AppShell";
 import BlitzLogo from "./components/BlitzLogo";
 import ChainFeed from "./components/ChainFeed";
 import Leaderboard from "./components/Leaderboard";
+import Settings from "./components/Settings";
 import Onboarding from "./onboarding/Onboarding";
 import HigherLower from "./games/HigherLower";
 import LaserParty from "./games/LaserParty";
@@ -12,14 +13,14 @@ import { api, type ApiUser } from "./lib/api";
 import { initTelegram } from "./lib/telegram";
 import { UserContext } from "./lib/userContext";
 
-type Screen = { name: "hub" } | { name: "game"; game: GameId } | { name: "leaderboard" };
-
 function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<ApiUser | null>(null);
   const [onboard, setOnboard] = useState<{ firstName: string | null; suggestedRef: string | null } | null>(null);
-  const [screen, setScreen] = useState<Screen>({ name: "hub" });
+  const [tab, setTab] = useState<Tab>("play");
+  const [currentGame, setCurrentGame] = useState<GameId>("laser-party");
+  const [drawer, setDrawer] = useState(false);
 
   useEffect(() => {
     initTelegram();
@@ -60,14 +61,8 @@ function App() {
     };
   }, [user?.telegramId]);
 
-  // Return to the hub and refresh the referral count.
-  function backToHub() {
-    setScreen({ name: "hub" });
-    api
-      .me()
-      .then((res) => res.user && setUser(res.user))
-      .catch(() => {});
-  }
+  // "Back" inside a game now opens the games drawer (there's no home screen).
+  const openDrawer = () => setDrawer(true);
 
   if (loading) return <Splash />;
 
@@ -100,28 +95,33 @@ function App() {
 
   if (!user) return <Splash />;
 
-  if (screen.name === "leaderboard") return <Leaderboard onBack={backToHub} />;
+  const blitzBalance = Number(user.balances?.blitz ?? 0);
+  const game =
+    currentGame === "higher-lower" ? <HigherLower onBack={openDrawer} blitzBalance={blitzBalance} /> :
+    currentGame === "laser-party" ? <LaserParty onBack={openDrawer} blitzBalance={blitzBalance} /> :
+    <DeathRun onBack={openDrawer} blitzBalance={blitzBalance} />;
 
-  if (screen.name === "game") {
-    const blitzBalance = Number(user.balances?.blitz ?? 0);
-    const game =
-      screen.game === "higher-lower" ? <HigherLower onBack={backToHub} blitzBalance={blitzBalance} /> :
-      screen.game === "laser-party" ? <LaserParty onBack={backToHub} blitzBalance={blitzBalance} /> :
-      <DeathRun onBack={backToHub} blitzBalance={blitzBalance} />;
-    return (
-      <UserContext.Provider value={user}>
-        {game}
-        <ChainFeed />
-      </UserContext.Provider>
-    );
-  }
+  const content =
+    tab === "leaderboard" ? <Leaderboard onBack={() => setTab("play")} user={user} /> :
+    tab === "history" ? <Settings user={user} onBack={() => setTab("play")} /> :
+    game;
 
   return (
-    <GameHub
-      user={user}
-      onSelectGame={(game) => setScreen({ name: "game", game })}
-      onOpenLeaderboard={() => setScreen({ name: "leaderboard" })}
-    />
+    <UserContext.Provider value={user}>
+      <AppShell
+        tab={tab}
+        onTab={setTab}
+        currentGame={currentGame}
+        onSelectGame={(g) => setCurrentGame(g)}
+        refCode={user.refCode}
+        referralLink={user.referralLink}
+        drawer={drawer}
+        setDrawer={setDrawer}
+      >
+        {content}
+      </AppShell>
+      <ChainFeed />
+    </UserContext.Provider>
   );
 }
 

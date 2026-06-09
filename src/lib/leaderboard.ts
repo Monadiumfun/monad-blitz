@@ -8,11 +8,20 @@ export interface ScoreEntry {
 }
 
 const STORAGE_KEY = 'blitz_leaderboard'
+const LEGACY_STORAGE_KEY = 'blitzgames_leaderboard'
 const MAX_ENTRIES = 50
+
+function migrateLegacy(): string | null {
+  const legacy = localStorage.getItem(LEGACY_STORAGE_KEY)
+  if (legacy === null) return null
+  localStorage.setItem(STORAGE_KEY, legacy)
+  localStorage.removeItem(LEGACY_STORAGE_KEY)
+  return legacy
+}
 
 function load(): ScoreEntry[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(STORAGE_KEY) ?? migrateLegacy()
     return raw ? JSON.parse(raw) : []
   } catch {
     return []

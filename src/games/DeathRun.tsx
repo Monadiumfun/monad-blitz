@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { sfxTap, sfxCorrect, sfxBust, sfxCashout, sfxSuspense } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
-import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
+import { startChainGame, endChainGame, fetchOutcome } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
 import SharePnL from '../components/SharePnL'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
@@ -17,7 +17,7 @@ type TilesPerRow = 2 | 3 | 4
 
 const FEE_FACTOR = 0.96
 const PREVIEW_ROWS = 3
-const SUSPENSE_MS = 650
+const SUSPENSE_MS = 300
 
 function rowMultiplier(tilesPerRow: TilesPerRow): number {
   return (1 / (1 - 1 / tilesPerRow)) * FEE_FACTOR
@@ -89,7 +89,6 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
 
     sfxTap()
     sfxSuspense()
-    recordChainMove(0, picks.length + 1)
     setSuspenseTile(tileIndex)
     setGameState('suspense')
 
@@ -150,17 +149,6 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
         <div className="w-full max-w-[420px] flex flex-col gap-6 animate-fade-in">
-          <header className="flex items-center">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Back
-            </button>
-          </header>
 
           <div className="text-center">
             <span className="text-4xl mb-3 block">💀</span>
@@ -204,14 +192,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
       <div className="w-full max-w-[420px] flex flex-col gap-3">
         <header className="flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <div className="w-6" />
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#6b7280]">
               Row <span className="text-white font-bold">{picks.length + 1}</span>
