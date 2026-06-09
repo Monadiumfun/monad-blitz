@@ -63,7 +63,7 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
       <div className="w-full max-w-[420px] flex flex-col gap-5">
         <header className="flex items-center justify-between">
           <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-white tracking-tight leading-none">
+            <h1 className="text-2xl text-white brand leading-none">
               Blitz<span className="text-[#a2e634]">Games</span>
             </h1>
             <span className="text-xs text-gray-500 mt-1">@{user.username}</span>
