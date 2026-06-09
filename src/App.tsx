@@ -107,7 +107,7 @@ function App() {
 function Splash({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center justify-center gap-4">
-      <h1 className="text-3xl font-extrabold text-white tracking-tight animate-pulse">
+      <h1 className="text-3xl text-white brand animate-pulse">
         Blitz<span className="text-[#a2e634]">Games</span>
       </h1>
       {children}

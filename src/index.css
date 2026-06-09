@@ -15,6 +15,7 @@
   --color-border: #2a2a3a;
   --font-sans: 'Press Start 2P', system-ui, monospace;
   --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Gabarito', system-ui, sans-serif;
 }
 
 * {
@@ -31,6 +32,14 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Brand wordmark / display titles — Gabarito extra-bold, tight tracking, purple glow. */
+.brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  text-shadow: 0 0 10px rgba(110, 84, 255, 0.55), 0 0 26px rgba(110, 84, 255, 0.35);
 }
 
 /* Press Start 2P is great for display but unreadable in long copy — opt those
