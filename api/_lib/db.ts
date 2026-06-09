@@ -1,4 +1,5 @@
 import { createClient, type Client } from "@libsql/client";
+import { formatEther } from "viem";
 
 let _db: Client | null = null;
 
@@ -161,6 +162,46 @@ export async function leaderboard(limit = 100): Promise<LeaderRow[]> {
     username: String(row.username),
     referrals: Number(row.referrals),
     telegram_id: Number(row.telegram_id),
+  }));
+}
+
+export interface PnlRow {
+  rank: number;
+  username: string;
+  pnl: number;
+  telegram_id: number;
+}
+
+/**
+ * Net BLITZ profit/loss per player over settled games.
+ * Per game: payout - wager = wager * (multiplier_bps - 10000) / 10000 (in wei).
+ * Aggregated with BigInt to avoid SQLite 64-bit overflow on wei sums.
+ */
+export async function pnlLeaderboard(): Promise<PnlRow[]> {
+  const c = db();
+  const r = await c.execute(
+    `SELECT g.telegram_id, u.username, g.wager, g.multiplier_bps
+     FROM games g JOIN users u ON u.telegram_id = g.telegram_id
+     WHERE g.status = 'settled' AND g.multiplier_bps IS NOT NULL`,
+  );
+  const acc = new Map<number, { username: string; pnl: bigint }>();
+  for (const row of r.rows) {
+    const tid = Number(row.telegram_id);
+    const wager = BigInt(String(row.wager ?? "0"));
+    const mbps = BigInt(Number(row.multiplier_bps ?? 0));
+    const delta = (wager * (mbps - 10_000n)) / 10_000n;
+    const cur = acc.get(tid) ?? { username: String(row.username), pnl: 0n };
+    cur.pnl += delta;
+    acc.set(tid, cur);
+  }
+  const sorted = [...acc.entries()].sort((a, b) =>
+    b[1].pnl > a[1].pnl ? 1 : b[1].pnl < a[1].pnl ? -1 : 0,
+  );
+  return sorted.map(([tid, v], i) => ({
+    rank: i + 1,
+    username: v.username,
+    pnl: Number(formatEther(v.pnl)),
+    telegram_id: tid,
   }));
 }
 
