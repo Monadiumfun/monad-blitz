@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { sfxTap, sfxCorrect, sfxBust, sfxCashout } from '../lib/sounds'
 
 interface DeathRunProps {
   onBack: () => void
@@ -65,12 +66,16 @@ function DeathRun({ onBack }: DeathRunProps) {
   const handleTilePick = useCallback((rowIndex: number, tileIndex: number) => {
     if (gameState !== 'playing' || rowIndex !== currentRow) return
 
+    sfxTap()
+
     if (mines[rowIndex] === tileIndex) {
+      sfxBust()
       setPicks(p => [...p, tileIndex])
       setGameState('bust')
       return
     }
 
+    sfxCorrect()
     const newPicks = [...picks, tileIndex]
     setPicks(newPicks)
     const nextRow = currentRow + 1
@@ -80,6 +85,7 @@ function DeathRun({ onBack }: DeathRunProps) {
 
   const handleCashOut = useCallback(() => {
     if (gameState === 'playing' && picks.length > 0) {
+      sfxCashout()
       setGameState('cashout')
     }
   }, [gameState, picks.length])
