@@ -35,3 +35,6 @@ local.db
 local.db-*
 .vercel
 .env*.local
+
+# foundry deploy logs
+contracts/broadcast/
