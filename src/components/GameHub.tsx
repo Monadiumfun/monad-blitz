@@ -97,7 +97,19 @@ function GameHub({ onSelectGame, balance }: GameHubProps) {
           })}
         </div>
 
-        <footer className="mt-auto pt-6 pb-4 text-center">
+        <button
+          onClick={() => onSelectGame("leaderboard")}
+          className="mt-2 w-full py-3 rounded-xl border border-[#2a2a3a] bg-[#12121a] text-sm font-bold text-[#6b7280] hover:border-[#a2e634] hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="8" width="3.5" height="7" rx="1" fill="currentColor"/>
+            <rect x="6.25" y="4" width="3.5" height="11" rx="1" fill="#a2e634"/>
+            <rect x="11.5" y="6" width="3.5" height="9" rx="1" fill="currentColor"/>
+          </svg>
+          Leaderboard
+        </button>
+
+        <footer className="pt-4 pb-4 text-center">
           <p className="text-xs text-gray-500">
             Built on{" "}
             <span className="font-semibold text-[#836FFF]">Monad</span>
