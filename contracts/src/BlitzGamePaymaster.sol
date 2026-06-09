@@ -5,7 +5,7 @@ import "@account-abstraction/core/BasePaymaster.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-contract NadPaymaster is BasePaymaster {
+contract BlitzGamePaymaster is BasePaymaster {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
     using UserOperationLib for PackedUserOperation;
