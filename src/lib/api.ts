@@ -70,4 +70,26 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ game, score }),
     }).catch(() => ({ ok: false })),
+  gameStart: (game: string, wager?: number) =>
+    request<{ gameId: number; txHash: string }>("/api/game-start", {
+      method: "POST",
+      body: JSON.stringify({ game, wager }),
+    }),
+  gameMove: (gameId: number, moveType: number, value: number) =>
+    request<{ txHash: string }>("/api/game-move", {
+      method: "POST",
+      body: JSON.stringify({ gameId, moveType, value }),
+    }),
+  gameEnd: (gameId: number, score: number, multiplier: number) =>
+    request<{ txHash: string; payout: string | null }>("/api/game-end", {
+      method: "POST",
+      body: JSON.stringify({ gameId, score, multiplier }),
+    }),
+  vote: (entity: string) =>
+    request<{ txHash: string }>("/api/vote", {
+      method: "POST",
+      body: JSON.stringify({ entity }),
+    }).catch(() => null),
+  getVotes: (entities: string[]) =>
+    request<{ votes: Record<string, number> }>(`/api/vote?entities=${entities.map(encodeURIComponent).join(",")}`),
 };
