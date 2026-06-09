@@ -7,6 +7,7 @@ export interface Entity {
   metricLabel: string
   value: number
   emoji: string
+  image?: string
 }
 
 export interface GameState {
