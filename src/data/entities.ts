@@ -387,21 +387,51 @@ export const entities: Entity[] = [
 
 const GEO_REDRAW_CHANCE = 0.65
 
-export function getRandomPair(sameCategoryOnly = true): [Entity, Entity] {
+const METRIC_GROUPS: Record<string, string> = {
+  instagram: 'followers',
+  athlete_instagram: 'followers',
+  club_instagram: 'followers',
+  market_cap: 'dollars',
+  tech_market_cap: 'dollars',
+  gdp: 'dollars',
+  food_revenue: 'dollars',
+  population: 'people',
+  city_pop: 'people',
+  app_users: 'people',
+  drug_users: 'people',
+  fame: 'hype',
+  meme_popularity: 'hype',
+  ph_searches: 'hype',
+}
+
+const GROUP_LABELS: Record<string, string> = {
+  followers: 'Instagram Followers (M)',
+  dollars: 'Worth ($B)',
+  people: 'Humans (M)',
+  hype: 'Fame Score',
+}
+
+function comparisonKey(e: Entity): string {
+  return METRIC_GROUPS[e.metric] ?? e.metric
+}
+
+export function comparisonLabel(e: Entity): string {
+  return GROUP_LABELS[METRIC_GROUPS[e.metric] ?? ''] ?? e.metricLabel
+}
+
+export function getRandomPair(): [Entity, Entity] {
   const pool = [...entities]
   let first = pool[Math.floor(Math.random() * pool.length)]
   if (first.category === 'geo' && Math.random() < GEO_REDRAW_CHANCE) {
     first = pool[Math.floor(Math.random() * pool.length)]
   }
-  const candidates = sameCategoryOnly
-    ? pool.filter(e => e.metric === first.metric && e.name !== first.name)
-    : pool.filter(e => e.name !== first.name || e.metric !== first.metric)
-  const second = candidates[Math.floor(Math.random() * candidates.length)]
-  return [first, second]
+  return [first, getNextEntity(first)]
 }
 
 export function getNextEntity(current: Entity): Entity {
-  const candidates = entities.filter(e => e.metric === current.metric && e.name !== current.name)
+  const candidates = entities.filter(
+    e => comparisonKey(e) === comparisonKey(current) && e.name !== current.name
+  )
   return candidates[Math.floor(Math.random() * candidates.length)]
 }
 
