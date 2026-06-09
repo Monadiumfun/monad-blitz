@@ -32,6 +32,23 @@ function fitGridPx(): number {
   return Math.min(GRID_CAP_PX, w - 28)
 }
 
+// Cumulative multiplier after each survived round, for the top progress track.
+function laserLadder(gridSize: number): number[] {
+  const ladder = [1]
+  let mult = 1
+  let dRows = 0
+  let dCols = 0
+  for (let r = 0; r < gridSize * 2 - 2; r++) {
+    const isCol = r % 2 === 0
+    const alive = isCol ? gridSize - dCols : gridSize - dRows
+    if (alive <= 1) break
+    mult *= (1 / (1 - 1 / alive)) * HOUSE_EDGE
+    if (isCol) dCols++; else dRows++
+    ladder.push(mult)
+  }
+  return ladder
+}
+
 function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
   const [maxGridPx, setMaxGridPx] = useState(fitGridPx)
   useEffect(() => {
@@ -79,6 +96,8 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
     const maxDim = Math.max(aliveRows.length, aliveCols.length, 1)
     return Math.min(Math.floor((maxGridPx - (maxDim - 1) * GAP) / maxDim), 72)
   }, [aliveRows.length, aliveCols.length, maxGridPx])
+
+  const ladder = useMemo(() => laserLadder(gridSize), [gridSize])
 
   const reset = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
@@ -334,12 +353,12 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
               ? '#e74c3c60'
               : isPlayer
                 ? '#6E54FF30'
-                : '#1a1a2e',
+                : '#160606',
             borderColor: isBeingLased
-              ? '#e74c3c'
+              ? '#ff5b4d'
               : isPlayer
                 ? '#6E54FF'
-                : '#2a2a3a',
+                : '#e0564e',
             boxShadow: isPlayer && !isBeingLased
               ? '0 0 14px rgba(110, 84, 255, 0.4)'
               : isBeingLased
@@ -419,6 +438,38 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
             <div className="w-[72px]" />
           )}
         </header>
+
+        {/* multiplier progress track */}
+        <div className="mb-3 px-1">
+          <div className="relative h-3 mb-1">
+            {ladder.map((m, i) => {
+              if (ladder.length > 1 && i !== 0 && i !== ladder.length - 1 && i % Math.ceil(ladder.length / 5) !== 0) return null
+              return (
+                <span
+                  key={i}
+                  className="absolute -translate-x-1/2 text-[9px] font-mono text-[#8898a8] whitespace-nowrap"
+                  style={{ left: `${ladder.length > 1 ? (i / (ladder.length - 1)) * 100 : 0}%` }}
+                >
+                  {m < 10 ? m.toFixed(2) : m.toFixed(1)}x
+                </span>
+              )
+            })}
+          </div>
+          <div className="relative h-2 flex items-center">
+            <div className="absolute inset-x-0 h-[3px] rounded-full bg-[#2a1414]" />
+            <div
+              className="absolute left-0 h-[3px] rounded-full bg-[#6E54FF] transition-[width] duration-300"
+              style={{ width: `${ladder.length > 1 ? (Math.min(round, ladder.length - 1) / (ladder.length - 1)) * 100 : 0}%` }}
+            />
+            {ladder.map((_, i) => (
+              <div
+                key={i}
+                className={`absolute w-[2px] h-2 -translate-x-1/2 rounded ${i <= round ? 'bg-[#6E54FF]' : 'bg-[#3a2222]'}`}
+                style={{ left: `${ladder.length > 1 ? (i / (ladder.length - 1)) * 100 : 0}%` }}
+              />
+            ))}
+          </div>
+        </div>
 
         <div className="text-center mb-2">
           {playerRow < 0 && !isLasing && (
