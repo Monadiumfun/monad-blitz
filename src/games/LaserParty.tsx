@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from 'react'
 import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds'
+import { addScore } from '../lib/leaderboard'
 
 interface LaserPartyProps {
   onBack: () => void
@@ -103,6 +104,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
 
       if (hit) {
         sfxBust()
+        addScore('laser-party', currentMult, `${currentRound} rounds`)
         if (dim === 'row') setDestroyedRows(prev => [...prev, target])
         else setDestroyedCols(prev => [...prev, target])
         setPhase('bust')
@@ -268,7 +270,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
           </div>
           {round > 0 && !isLasing ? (
             <button
-              onClick={() => { sfxCashout(); setPhase('cashout') }}
+              onClick={() => { sfxCashout(); addScore('laser-party', multiplier, `${round} rounds`); setPhase('cashout') }}
               className="px-4 py-2 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-xs animate-pulse-green active:scale-[0.95]"
             >
               CASH OUT
