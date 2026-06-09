@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { getRandomPair, categoryLabels } from '../data/entities'
+import { sfxCorrect, sfxWrong, sfxTap, sfxBust } from '../lib/sounds'
 import type { Entity } from '../types'
 
 interface HigherLowerProps {
@@ -40,8 +41,10 @@ function HigherLower({ onBack }: HigherLowerProps) {
     const correct = pickedEntity.value >= otherEntity.value
 
     setPicked(side)
+    sfxTap()
 
     if (correct) {
+      sfxCorrect()
       setPhase('correct')
       setStreak(s => s + 1)
       setTimeout(() => {
@@ -53,8 +56,9 @@ function HigherLower({ onBack }: HigherLowerProps) {
         setAnimKey(k => k + 1)
       }, 800)
     } else {
+      sfxWrong()
       setPhase('wrong')
-      setTimeout(() => setPhase('gameover'), 1200)
+      setTimeout(() => { sfxBust(); setPhase('gameover') }, 1200)
     }
   }, [phase, leftCard, rightCard])
 
@@ -133,11 +137,7 @@ function HigherLower({ onBack }: HigherLowerProps) {
           <div className="w-[24px]" />
         </header>
 
-        <div className="text-center mb-4">
-          <span className="text-sm text-[#6b7280] font-medium">
-            Which has more <span className="text-white font-semibold">{leftCard.metricLabel}</span>?
-          </span>
-        </div>
+        <div className="h-4" />
 
         <div className="flex gap-3 flex-1 items-stretch mb-4">
           {renderCard(leftCard, 'left')}

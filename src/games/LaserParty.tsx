@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo } from 'react'
+import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds'
 
 interface LaserPartyProps {
   onBack: () => void
@@ -71,6 +72,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
   ) => {
     setIsLasing(true)
     setLastSurvived(false)
+    sfxLaser()
 
     const isColRound = currentRound % 2 === 0
     const dim: 'row' | 'col' = isColRound ? 'col' : 'row'
@@ -100,10 +102,12 @@ function LaserParty({ onBack }: LaserPartyProps) {
       setIsLasing(false)
 
       if (hit) {
+        sfxBust()
         if (dim === 'row') setDestroyedRows(prev => [...prev, target])
         else setDestroyedCols(prev => [...prev, target])
         setPhase('bust')
       } else {
+        sfxCorrect()
         if (dim === 'row') setDestroyedRows(prev => [...prev, target])
         else setDestroyedCols(prev => [...prev, target])
 
@@ -127,6 +131,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
   const handleCellTap = useCallback((row: number, col: number) => {
     if (isLasing || phase !== 'playing') return
 
+    sfxTap()
     setPlayerRow(row)
     setPlayerCol(col)
     setLastSurvived(false)
@@ -263,7 +268,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
           </div>
           {round > 0 && !isLasing ? (
             <button
-              onClick={() => setPhase('cashout')}
+              onClick={() => { sfxCashout(); setPhase('cashout') }}
               className="px-4 py-2 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-xs animate-pulse-green active:scale-[0.95]"
             >
               CASH OUT
