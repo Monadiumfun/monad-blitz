@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { verifyInitData, type VerifiedInit } from "./telegram.ts";
+import { verifyInitData, type VerifiedInit } from "./telegram";
 
 export type Req = IncomingMessage & { body?: unknown; query?: Record<string, string> };
 export type Res = ServerResponse;

@@ -1,7 +1,7 @@
-import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { getActiveGame, getUser, initSchema } from "./_lib/db.ts";
-import { sendSponsored } from "./_lib/aa.ts";
-import { buildMoveCall } from "./_lib/nadgames.ts";
+import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http";
+import { getActiveGame, getUser, initSchema } from "./_lib/db";
+import { sendSponsored } from "./_lib/aa";
+import { buildMoveCall } from "./_lib/nadgames";
 
 export default async function handler(req: Req, res: Res) {
   applyCors(res);
