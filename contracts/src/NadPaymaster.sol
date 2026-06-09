@@ -27,6 +27,9 @@ contract NadPaymaster is BasePaymaster {
         verifyingSigner = _verifyingSigner;
     }
 
+    function _validateEntryPointInterface(IEntryPoint) internal pure override {}
+
+
     function getHash(
         PackedUserOperation calldata userOp,
         uint48 validUntil,
