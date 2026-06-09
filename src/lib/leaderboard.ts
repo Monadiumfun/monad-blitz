@@ -7,7 +7,7 @@ export interface ScoreEntry {
   timestamp: number
 }
 
-const STORAGE_KEY = 'blitzgames_leaderboard'
+const STORAGE_KEY = 'blitz_leaderboard'
 const MAX_ENTRIES = 50
 
 function load(): ScoreEntry[] {
