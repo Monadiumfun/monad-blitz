@@ -1,12 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { sfxTap, sfxCorrect, sfxBust, sfxCashout, sfxSuspense } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
+import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
+import { api } from '../lib/api'
 
 interface DeathRunProps {
   onBack: () => void
 }
 
 type GameState = 'setup' | 'playing' | 'suspense' | 'cashout' | 'bust'
+type ChainStatus = 'idle' | 'starting' | 'live' | 'settling' | 'settled' | 'error'
 type TilesPerRow = 2 | 3 | 4
 
 const FEE_FACTOR = 0.96
@@ -35,6 +38,9 @@ function DeathRun({ onBack }: DeathRunProps) {
   const [mines, setMines] = useState<number[]>([])
   const [picks, setPicks] = useState<number[]>([])
   const [suspenseTile, setSuspenseTile] = useState<number>(-1)
+  const [chainGameId, setChainGameId] = useState<number | null>(null)
+  const [chainStatus, setChainStatus] = useState<ChainStatus>('idle')
+  const [txHash, setTxHash] = useState<string | null>(null)
   const currentRowRef = useRef<HTMLDivElement | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -56,6 +62,7 @@ function DeathRun({ onBack }: DeathRunProps) {
   }, [])
 
   const startGame = useCallback((tiles: TilesPerRow) => {
+    startChainGame('death-run')
     setTilesPerRow(tiles)
     const initial: number[] = []
     for (let i = 0; i < PREVIEW_ROWS + 1; i++) {
@@ -65,7 +72,17 @@ function DeathRun({ onBack }: DeathRunProps) {
     setCurrentRow(0)
     setPicks([])
     setSuspenseTile(-1)
+    setChainStatus('starting')
+    setTxHash(null)
+    setChainGameId(null)
     setGameState('playing')
+    api.gameStart('death-run').then(res => {
+      setChainGameId(res.gameId)
+      setTxHash(res.txHash)
+      setChainStatus('live')
+    }).catch(() => {
+      setChainStatus('error')
+    })
   }, [])
 
   const handleTilePick = useCallback((rowIndex: number, tileIndex: number) => {
@@ -73,6 +90,7 @@ function DeathRun({ onBack }: DeathRunProps) {
 
     sfxTap()
     sfxSuspense()
+    recordChainMove(0, picks.length + 1)
     setSuspenseTile(tileIndex)
     setGameState('suspense')
 
@@ -83,8 +101,18 @@ function DeathRun({ onBack }: DeathRunProps) {
         sfxBust()
         const mult = cumulativeMultiplier(tilesPerRow, picks.length)
         addScore('death-run', mult, `Row ${picks.length}`)
+        endChainGame(picks.length, 0)
         setPicks(p => [...p, tileIndex])
         setGameState('bust')
+        if (chainGameId != null) {
+          setChainStatus('settling')
+          api.gameEnd(chainGameId, picks.length, 0).then(res => {
+            setTxHash(res.txHash)
+            setChainStatus('settled')
+          }).catch(() => {
+            setChainStatus('error')
+          })
+        }
         return
       }
 
@@ -96,18 +124,29 @@ function DeathRun({ onBack }: DeathRunProps) {
       setMines(prev => ensureMines(nextRow + PREVIEW_ROWS, tilesPerRow, prev))
       setGameState('playing')
     }, SUSPENSE_MS)
-  }, [gameState, currentRow, mines, picks, tilesPerRow, ensureMines])
+  }, [gameState, currentRow, mines, picks, tilesPerRow, ensureMines, chainGameId])
 
   const handleCashOut = useCallback(() => {
     if (gameState === 'playing' && picks.length > 0) {
       sfxCashout()
       addScore('death-run', multiplier, `Row ${picks.length}`)
+      endChainGame(picks.length, multiplier)
       setGameState('cashout')
+      if (chainGameId != null) {
+        setChainStatus('settling')
+        api.gameEnd(chainGameId, picks.length, multiplier).then(res => {
+          setTxHash(res.txHash)
+          setChainStatus('settled')
+        }).catch(() => {
+          setChainStatus('error')
+        })
+      }
     }
-  }, [gameState, picks.length])
+  }, [gameState, picks.length, multiplier, chainGameId])
 
   const handlePlayAgain = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
+    startChainGame('death-run')
     const initial: number[] = []
     for (let i = 0; i < PREVIEW_ROWS + 1; i++) {
       initial.push(Math.floor(Math.random() * tilesPerRow))
@@ -116,7 +155,17 @@ function DeathRun({ onBack }: DeathRunProps) {
     setCurrentRow(0)
     setPicks([])
     setSuspenseTile(-1)
+    setChainGameId(null)
+    setChainStatus('starting')
+    setTxHash(null)
     setGameState('playing')
+    api.gameStart('death-run').then(res => {
+      setChainGameId(res.gameId)
+      setTxHash(res.txHash)
+      setChainStatus('live')
+    }).catch(() => {
+      setChainStatus('error')
+    })
   }, [tilesPerRow])
 
   if (gameState === 'setup') {
@@ -292,6 +341,39 @@ function DeathRun({ onBack }: DeathRunProps) {
         {gameState === 'playing' && picks.length === 0 && (
           <div className="text-center text-xs text-[#6b7280] py-3">
             Pick a tile to start climbing
+          </div>
+        )}
+
+        {chainStatus !== 'idle' && (
+          <div className="text-center text-[10px] py-1">
+            {chainStatus === 'starting' && (
+              <span className="text-[#6b7280]">Starting on-chain...</span>
+            )}
+            {chainStatus === 'live' && (
+              <span className="text-[#a2e634] flex items-center justify-center gap-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#a2e634]" />
+                On-chain
+              </span>
+            )}
+            {chainStatus === 'settling' && (
+              <span className="text-[#6b7280]">Settling...</span>
+            )}
+            {chainStatus === 'settled' && txHash && (
+              <span className="text-[#6b7280]">
+                Settled{' '}
+                <a
+                  href={`https://testnet.monadscan.com/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#a2e634] underline"
+                >
+                  {txHash.slice(0, 6)}...{txHash.slice(-4)}
+                </a>
+              </span>
+            )}
+            {chainStatus === 'error' && (
+              <span className="text-[#6b7280]/50">Off-chain</span>
+            )}
           </div>
         )}
 

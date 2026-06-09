@@ -1,8 +1,11 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { getRandomPair, categoryLabels } from '../data/entities'
 import { sfxCorrect, sfxWrong, sfxTap, sfxBust } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
+import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
 import type { Entity } from '../types'
+
+type ChainStatus = 'idle' | 'starting' | 'live' | 'settling' | 'settled' | 'error'
 
 interface HigherLowerProps {
   onBack: () => void
@@ -27,6 +30,22 @@ function HigherLower({ onBack }: HigherLowerProps) {
   const [phase, setPhase] = useState<Phase>('playing')
   const [picked, setPicked] = useState<'left' | 'right' | null>(null)
   const [animKey, setAnimKey] = useState(0)
+  const [chainStatus, setChainStatus] = useState<ChainStatus>('idle')
+  const [txHash, setTxHash] = useState<string | null>(null)
+
+  const fireGameStart = useCallback(() => {
+    setChainStatus('starting')
+    setTxHash(null)
+    void startChainGame('higher-lower').then(r => {
+      if (!r) return setChainStatus('error')
+      setChainStatus('live')
+      setTxHash(r.txHash)
+    })
+  }, [])
+
+  useEffect(() => {
+    fireGameStart()
+  }, [fireGameStart])
 
   const initCards = useCallback(() => {
     const [a, b] = getRandomPair(true)
@@ -46,6 +65,7 @@ function HigherLower({ onBack }: HigherLowerProps) {
 
     if (correct) {
       sfxCorrect()
+      recordChainMove(0, streak + 1)
       setPhase('correct')
       setStreak(s => s + 1)
       setTimeout(() => {
@@ -58,22 +78,30 @@ function HigherLower({ onBack }: HigherLowerProps) {
       }, 800)
     } else {
       sfxWrong()
+      recordChainMove(1, streak)
       setPhase('wrong')
       setTimeout(() => {
         sfxBust()
         addScore('higher-lower', streak, `${streak} streak`)
+        setChainStatus('settling')
+        void endChainGame(streak, streak).then(r => {
+          if (!r) return setChainStatus('error')
+          setTxHash(r.txHash)
+          setChainStatus('settled')
+        })
         setPhase('gameover')
       }, 1200)
     }
   }, [phase, leftCard, rightCard])
 
   const handlePlayAgain = useCallback(() => {
+    fireGameStart()
     initCards()
     setStreak(0)
     setPhase('playing')
     setPicked(null)
     setAnimKey(k => k + 1)
-  }, [initCards])
+  }, [initCards, fireGameStart])
 
   const renderCard = (entity: Entity, side: 'left' | 'right') => {
     const isPicked = picked === side
@@ -156,6 +184,37 @@ function HigherLower({ onBack }: HigherLowerProps) {
             {phase === 'correct' ? 'CORRECT!' : 'WRONG!'}
           </div>
         )}
+
+        <div className="text-[10px] text-center pb-2">
+          {chainStatus === 'starting' && (
+            <span className="text-[#6b7280]">Starting on-chain...</span>
+          )}
+          {chainStatus === 'live' && (
+            <span className="text-[#22c55e] flex items-center justify-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+              On-chain
+            </span>
+          )}
+          {chainStatus === 'settling' && (
+            <span className="text-[#6b7280]">Settling...</span>
+          )}
+          {chainStatus === 'settled' && txHash && (
+            <span className="text-[#6b7280]">
+              Settled{' '}
+              <a
+                href={`https://testnet.monadscan.com/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-[#6b7280] hover:text-white"
+              >
+                {txHash.slice(0, 6)}...{txHash.slice(-4)}
+              </a>
+            </span>
+          )}
+          {chainStatus === 'error' && (
+            <span className="text-[#4b5563]">Off-chain</span>
+          )}
+        </div>
 
         {phase === 'gameover' && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 animate-fade-in">
