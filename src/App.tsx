@@ -127,10 +127,10 @@ function App() {
 function Splash({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center justify-center gap-4">
-      <h1 className="text-3xl text-white brand animate-pulse">
+      <h1 className="text-3xl text-white brand">
         Blitz
       </h1>
-      {children}
+      {children ?? <span className="loader-ring" style={{ width: 22, height: 22, borderWidth: 3 }} />}
     </div>
   );
 }
