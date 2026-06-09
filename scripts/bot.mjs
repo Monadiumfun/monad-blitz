@@ -1,4 +1,4 @@
-// NadGames Telegram bot — long-polling, zero external deps.
+// BlitzGames Telegram bot — long-polling, zero external deps.
 // - /start [code]  -> sends a "Play" button that launches the mini app (carrying ?ref=code)
 // - sets the persistent menu button to the mini app
 // Run with: node --env-file=.env scripts/bot.mjs   (or `npm run bot`)
@@ -31,7 +31,7 @@ async function configure() {
   });
   await call("setMyCommands", {
     commands: [
-      { command: "start", description: "Launch NadGames" },
+      { command: "start", description: "Launch BlitzGames" },
       { command: "play", description: "Open the games" },
     ],
   });
@@ -41,14 +41,14 @@ async function configure() {
 async function onStart(chatId, payload) {
   const url = appUrl(payload);
   const text = payload
-    ? `🎮 *NadGames* — you were invited with code \`${payload}\`!\nTap below to create your handle and play.`
-    : "🎮 *NadGames* on Monad\nMini-games, referrals & a live leaderboard. Tap to play 👇";
+    ? `🎮 *BlitzGames* — you were invited with code \`${payload}\`!\nTap below to create your handle and play.`
+    : "🎮 *BlitzGames* on Monad\nMini-games, referrals & a live leaderboard. Tap to play 👇";
   await call("sendMessage", {
     chat_id: chatId,
     text,
     parse_mode: "Markdown",
     reply_markup: {
-      inline_keyboard: [[{ text: "▶️ Play NadGames", web_app: { url } }]],
+      inline_keyboard: [[{ text: "▶️ Play BlitzGames", web_app: { url } }]],
     },
   });
 }
