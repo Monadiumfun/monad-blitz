@@ -44,10 +44,10 @@ function BetSelector({ balance, value, onChange }: BetSelectorProps) {
               disabled={disabled}
               className={`flex-1 py-2 rounded-xl border text-sm font-bold transition-all active:scale-[0.96] ${
                 active
-                  ? 'border-[#a2e634] bg-[#a2e63420] text-[#a2e634]'
+                  ? 'border-[#6E54FF] bg-[#6E54FF20] text-[#6E54FF]'
                   : disabled
                     ? 'border-[#2a2a3a] text-[#3a3a4a] cursor-not-allowed'
-                    : 'border-[#2a2a3a] bg-[#12121a] text-white hover:border-[#a2e634]/50'
+                    : 'border-[#2a2a3a] bg-[#12121a] text-white hover:border-[#6E54FF]/50'
               }`}
             >
               {preset}
@@ -64,7 +64,7 @@ function BetSelector({ balance, value, onChange }: BetSelectorProps) {
         max={upper}
         onChange={e => setDraft(e.target.value)}
         onBlur={e => commit(e.target.value)}
-        className="w-full rounded-xl border border-[#2a2a3a] bg-[#12121a] px-3 py-2.5 text-center text-base font-bold text-white outline-none focus:border-[#a2e634]"
+        className="w-full rounded-xl border border-[#2a2a3a] bg-[#12121a] px-3 py-2.5 text-center text-base font-bold text-white outline-none focus:border-[#6E54FF]"
         placeholder="Custom amount"
       />
 

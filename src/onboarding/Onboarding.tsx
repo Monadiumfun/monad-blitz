@@ -56,7 +56,7 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
       <div className="relative z-10 w-full max-w-[420px] flex flex-col flex-1">
         <header className="text-center mb-8 mt-4">
           <h1 className="text-3xl text-white brand">
-            Blitz<span className="text-[#a2e634]">Games</span>
+            Blitz
           </h1>
           <p className="text-sm text-gray-400 mt-2">
             {step === "username"
@@ -87,10 +87,10 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
               onKeyDown={(e) => e.key === "Enter" && nextFromUsername()}
               placeholder="e.g. nadking"
               maxLength={20}
-              className="w-full rounded-xl bg-[#12121a] border-2 border-[#2a2a3a] focus:border-[#a2e634] outline-none px-4 py-3.5 text-white text-lg font-semibold transition-colors"
+              className="w-full rounded-xl bg-[#12121a] border-2 border-[#2a2a3a] focus:border-[#6E54FF] outline-none px-4 py-3.5 text-white text-lg font-semibold transition-colors"
             />
-            <div className="flex items-center gap-2 rounded-lg bg-[#a2e634]/[0.06] border border-[#a2e634]/20 px-3 py-2.5">
-              <span className="text-[#a2e634] text-sm">⚠️</span>
+            <div className="flex items-center gap-2 rounded-lg bg-[#6E54FF]/[0.06] border border-[#6E54FF]/20 px-3 py-2.5">
+              <span className="text-[#6E54FF] text-sm">⚠️</span>
               <p className="text-xs text-gray-300 leading-snug">
                 Your username is <b className="text-white">permanent</b> and cannot be changed later. Choose wisely.
               </p>
@@ -99,7 +99,7 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
             <button
               onClick={nextFromUsername}
               disabled={!usernameValid}
-              className="mt-2 w-full rounded-xl bg-[#a2e634] disabled:bg-[#2a2a3a] disabled:text-gray-500 py-3.5 text-base font-bold text-[#0a0a0f] transition-all active:scale-[0.98]"
+              className="mt-2 w-full rounded-xl bg-[#6E54FF] disabled:bg-[#2a2a3a] disabled:text-gray-500 py-3.5 text-base font-bold text-white transition-all active:scale-[0.98]"
             >
               Continue
             </button>
@@ -120,7 +120,7 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
               }}
               placeholder="friend's username"
               maxLength={20}
-              className="w-full rounded-xl bg-[#12121a] border-2 border-[#2a2a3a] focus:border-[#a2e634] outline-none px-4 py-3.5 text-white text-lg font-semibold transition-colors"
+              className="w-full rounded-xl bg-[#12121a] border-2 border-[#2a2a3a] focus:border-[#6E54FF] outline-none px-4 py-3.5 text-white text-lg font-semibold transition-colors"
             />
             <p className="text-xs text-gray-500 leading-snug">
               Entering a friend's code credits them a referral. Climb the leaderboard by inviting others once you're in!
@@ -129,7 +129,7 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
             <button
               onClick={() => submit(true)}
               disabled={busy || !refCode.trim()}
-              className="mt-2 w-full rounded-xl bg-[#a2e634] disabled:bg-[#2a2a3a] disabled:text-gray-500 py-3.5 text-base font-bold text-[#0a0a0f] transition-all active:scale-[0.98]"
+              className="mt-2 w-full rounded-xl bg-[#6E54FF] disabled:bg-[#2a2a3a] disabled:text-gray-500 py-3.5 text-base font-bold text-white transition-all active:scale-[0.98]"
             >
               {busy ? "Creating…" : "Use code & continue"}
             </button>
@@ -157,7 +157,7 @@ function Dot({ active, done }: { active: boolean; done: boolean }) {
   return (
     <div
       className={`h-2.5 w-2.5 rounded-full transition-colors ${
-        active ? "bg-[#a2e634]" : done ? "bg-[#a2e634]/50" : "bg-[#2a2a3a]"
+        active ? "bg-[#6E54FF]" : done ? "bg-[#6E54FF]/50" : "bg-[#2a2a3a]"
       }`}
     />
   );

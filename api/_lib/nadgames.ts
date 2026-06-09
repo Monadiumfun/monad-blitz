@@ -7,8 +7,8 @@ import {
   type Hex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { BLITZ_ADDRESS } from "./chain.ts";
-import type { Call, SponsoredReceipt } from "./aa.ts";
+import { BLITZ_ADDRESS } from "./chain";
+import type { Call, SponsoredReceipt } from "./aa";
 
 export const NADGAMES_ADDRESS = (process.env.NADGAMES_ADDRESS || "") as Address;
 export const NADMOVES_ADDRESS = (process.env.NADMOVES_ADDRESS || "") as Address;

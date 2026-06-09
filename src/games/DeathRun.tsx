@@ -176,14 +176,14 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
                 key={tiles}
                 onClick={() => startGame(tiles)}
                 disabled={maxAffordable(blitzBalance) < WAGER_MIN}
-                className="flex items-center justify-between rounded-2xl border border-[#2a2a3a] bg-[#12121a] p-5 transition-all duration-150 hover:border-[#a2e634] hover:bg-[#1a1a2e] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2a2a3a]"
+                className="flex items-center justify-between rounded-2xl border border-[#2a2a3a] bg-[#12121a] p-5 transition-all duration-150 hover:border-[#6E54FF] hover:bg-[#1a1a2e] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2a2a3a]"
               >
                 <div className="flex flex-col items-start gap-1">
                   <span className="text-base font-bold text-white">{label}</span>
                   <span className="text-xs text-[#6b7280]">{desc}</span>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <span className="text-lg font-mono font-bold text-[#a2e634]">
+                  <span className="text-lg font-mono font-bold text-[#6E54FF]">
                     {rowMultiplier(tiles).toFixed(2)}x
                   </span>
                   <span className="text-[10px] text-[#6b7280] uppercase tracking-wider">per row</span>
@@ -216,7 +216,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
             <span className="text-sm text-[#6b7280]">
               Row <span className="text-white font-bold">{picks.length + 1}</span>
             </span>
-            <span className="text-lg font-mono font-bold text-[#a2e634]">
+            <span className="text-lg font-mono font-bold text-[#6E54FF]">
               {multiplier.toFixed(2)}x
             </span>
           </div>
@@ -241,7 +241,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
               >
                 <div className="w-8 flex justify-center shrink-0">
                   {isCurrentRow && !isSuspenseRow && (
-                    <div className="w-2 h-2 rounded-full bg-[#a2e634] animate-pulse-green" />
+                    <div className="w-2 h-2 rounded-full bg-[#6E54FF] animate-pulse-green" />
                   )}
                   {isSuspenseRow && (
                     <span className="text-sm animate-shake">...</span>
@@ -268,17 +268,17 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
                     } else if (isSuspenseTile) {
                       tileClass = 'bg-[#ffb34730] border-[#ffb347]'
                     } else if (isPicked) {
-                      tileClass = 'bg-[#a2e634]/20 border-[#a2e634]'
+                      tileClass = 'bg-[#6E54FF]/20 border-[#6E54FF]'
                       content = (
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M5 10L8.5 13.5L15 7" stroke="#a2e634" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M5 10L8.5 13.5L15 7" stroke="#6E54FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )
                     } else if (isRevealedMine) {
                       tileClass = 'bg-[#e74c3c]/20 border-[#e74c3c]/50'
                       content = <span className="text-sm opacity-60">💀</span>
                     } else if (isCurrentRow && gameState === 'playing') {
-                      tileClass = 'bg-[#1a1a2e] border-[#3a3a5a] hover:bg-[#2a2a4e] hover:border-[#a2e634]/50 cursor-pointer active:scale-95'
+                      tileClass = 'bg-[#1a1a2e] border-[#3a3a5a] hover:bg-[#2a2a4e] hover:border-[#6E54FF]/50 cursor-pointer active:scale-95'
                     }
 
                     return (
@@ -307,7 +307,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
         {gameState === 'playing' && picks.length > 0 && (
           <button
             onClick={handleCashOut}
-            className="w-full py-3.5 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97] animate-pulse-green"
+            className="w-full py-3.5 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97] animate-pulse-green"
           >
             CASH OUT {multiplier.toFixed(2)}x
           </button>
@@ -331,8 +331,8 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
               <span className="text-[#6b7280]">Starting on-chain...</span>
             )}
             {chainStatus === 'live' && (
-              <span className="text-[#a2e634] flex items-center justify-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#a2e634]" />
+              <span className="text-[#6E54FF] flex items-center justify-center gap-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#6E54FF]" />
                 On-chain
               </span>
             )}
@@ -346,7 +346,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
                   href={`https://testnet.monadscan.com/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#a2e634] underline"
+                  className="text-[#6E54FF] underline"
                 >
                   {txHash.slice(0, 6)}...{txHash.slice(-4)}
                 </a>
@@ -367,7 +367,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
             <div className="flex gap-2">
               <button
                 onClick={handlePlayAgain}
-                className="flex-1 py-3 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97]"
+                className="flex-1 py-3 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97]"
               >
                 Try Again
               </button>
@@ -384,14 +384,14 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
         {gameState === 'cashout' && (
           <div className="flex flex-col gap-3 animate-fade-in">
             <div className="text-center py-3">
-              <span className="text-xl font-bold text-[#a2e634]">CASHED OUT</span>
-              <span className="text-lg font-mono font-bold text-[#a2e634] ml-2 animate-count-up">{multiplier.toFixed(2)}x</span>
+              <span className="text-xl font-bold text-[#6E54FF]">CASHED OUT</span>
+              <span className="text-lg font-mono font-bold text-[#6E54FF] ml-2 animate-count-up">{multiplier.toFixed(2)}x</span>
             </div>
             <SharePnL game="Death Run" emoji="💀" multiplier={multiplier} wager={wager} />
             <div className="flex gap-2">
               <button
                 onClick={handlePlayAgain}
-                className="flex-1 py-3 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97]"
+                className="flex-1 py-3 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97]"
               >
                 Play Again
               </button>

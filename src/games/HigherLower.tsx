@@ -22,7 +22,7 @@ const BATCH_SIZE = 5
 const MULTIPLIER_BY_CORRECT = [0, 0.2, 0.5, 1.0, 1.8, 3.0]
 
 const categoryColors: Record<string, string> = {
-  crypto: '#a2e634',
+  crypto: '#6E54FF',
   culture: '#836FFF',
   geo: '#00d4ff',
   monad: '#836FFF',
@@ -130,17 +130,17 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
         } ${isWrong ? 'animate-shake' : ''} ${side === 'right' ? 'animate-slide-right' : ''}`}
         style={{
           backgroundColor: isCorrect
-            ? '#a2e63415'
+            ? '#6E54FF15'
             : isWrong
               ? '#e74c3c15'
               : '#12121a',
           borderColor: isCorrect
-            ? '#a2e634'
+            ? '#6E54FF'
             : isWrong
               ? '#e74c3c'
               : '#2a2a3a',
           boxShadow: isCorrect
-            ? '0 0 30px rgba(162, 230, 52, 0.15)'
+            ? '0 0 30px rgba(110, 84, 255, 0.15)'
             : isWrong
               ? '0 0 30px rgba(231, 76, 60, 0.15)'
               : 'none',
@@ -203,7 +203,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
               {MULTIPLIER_BY_CORRECT.map((m, i) => (
                 <div key={i} className="flex justify-between text-sm">
                   <span className="text-white">{i}/{BATCH_SIZE}</span>
-                  <span className={m >= 1 ? 'text-[#a2e634] font-mono font-bold' : 'text-[#e74c3c] font-mono'}>
+                  <span className={m >= 1 ? 'text-[#6E54FF] font-mono font-bold' : 'text-[#e74c3c] font-mono'}>
                     {m.toFixed(2)}x
                   </span>
                 </div>
@@ -214,7 +214,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
           <button
             onClick={beginBatch}
             disabled={maxAffordable(blitzBalance) < WAGER_MIN}
-            className="w-full py-3.5 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3.5 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Bet {wager} & Play
           </button>
@@ -242,7 +242,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
             <span className="text-[10px] text-[#6b7280] uppercase tracking-wide">
               Pick {Math.min(round + 1, BATCH_SIZE)}/{BATCH_SIZE}
             </span>
-            <span className="text-xl font-bold text-[#a2e634]">{correctCount} correct</span>
+            <span className="text-xl font-bold text-[#6E54FF]">{correctCount} correct</span>
           </div>
           <div className="w-[24px]" />
         </header>
@@ -258,7 +258,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
 
         {(phase === 'correct' || phase === 'wrong') && (
           <div className={`text-center mb-3 py-3 rounded-2xl font-bold text-base animate-fade-in ${
-            phase === 'correct' ? 'bg-[#a2e63420] text-[#a2e634]' : 'bg-[#e74c3c20] text-[#e74c3c]'
+            phase === 'correct' ? 'bg-[#6E54FF20] text-[#6E54FF]' : 'bg-[#e74c3c20] text-[#e74c3c]'
           }`}>
             {phase === 'correct' ? 'CORRECT!' : 'WRONG!'}
           </div>
@@ -293,12 +293,12 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 animate-fade-in">
             <div className="flex flex-col items-center gap-5 rounded-2xl border border-[#2a2a3a] bg-[#12121a] px-8 py-10 w-[320px]">
               <span className="text-4xl">{won ? '🎉' : '💀'}</span>
-              <h2 className={`text-xl font-bold ${won ? 'text-[#a2e634]' : 'text-[#e74c3c]'}`}>
+              <h2 className={`text-xl font-bold ${won ? 'text-[#6E54FF]' : 'text-[#e74c3c]'}`}>
                 {won ? 'You Win!' : 'Busted'}
               </h2>
               <div className="flex flex-col items-center gap-1">
                 <span className="text-sm text-[#6b7280]">{correctCount}/{BATCH_SIZE} correct</span>
-                <span className={`text-4xl font-mono font-bold animate-count-up ${won ? 'text-[#a2e634]' : 'text-[#e74c3c]'}`}>
+                <span className={`text-4xl font-mono font-bold animate-count-up ${won ? 'text-[#6E54FF]' : 'text-[#e74c3c]'}`}>
                   {finalMultiplier.toFixed(2)}x
                 </span>
               </div>
@@ -306,7 +306,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
                 {won && <SharePnL game="Higher or Lower" emoji="⚡" multiplier={finalMultiplier} wager={wager} />}
                 <button
                   onClick={() => setPhase('setup')}
-                  className="w-full py-3.5 rounded-xl bg-[#a2e634] text-[#0a0a0f] font-bold text-sm active:scale-[0.97]"
+                  className="w-full py-3.5 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97]"
                 >
                   Play Again
                 </button>

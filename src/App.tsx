@@ -57,7 +57,7 @@ function App() {
         <p className="text-sm text-[#e74c3c] text-center px-8">{error}</p>
         <button
           onClick={() => location.reload()}
-          className="mt-4 rounded-xl bg-[#a2e634] px-6 py-2.5 text-sm font-bold text-[#0a0a0f]"
+          className="mt-4 rounded-xl bg-[#6E54FF] px-6 py-2.5 text-sm font-bold text-white"
         >
           Retry
         </button>
@@ -109,7 +109,7 @@ function Splash({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center justify-center gap-4">
       <h1 className="text-3xl text-white brand animate-pulse">
-        Blitz<span className="text-[#a2e634]">Games</span>
+        Blitz
       </h1>
       {children}
     </div>

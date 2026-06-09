@@ -1,4 +1,4 @@
-# NadGames — Telegram Mini App (Monad Blitz)
+# Blitz — Telegram Mini App (Monad Blitz)
 
 Telegram Mini App for [Monadiumfun/monad-blitz](https://github.com/Monadiumfun/monad-blitz):
 onboarding with a **permanent username**, a **referral system** with a live

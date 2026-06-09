@@ -1,5 +1,5 @@
-import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { getUser, initSchema, submitScore } from "./_lib/db.ts";
+import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http";
+import { getUser, initSchema, submitScore } from "./_lib/db";
 
 const GAMES = new Set(["higher-lower", "laser-party", "death-run"]);
 

@@ -44,7 +44,7 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
 
   function share() {
     hapticTap();
-    const text = `Play BlitzGames on Monad with me 🎮 — use my code "${user.refCode}" or just tap:`;
+    const text = `Play Blitz on Monad with me 🎮 — use my code "${user.refCode}" or just tap:`;
     const url = `https://t.me/share/url?url=${encodeURIComponent(user.referralLink)}&text=${encodeURIComponent(text)}`;
     openTelegramLink(url);
   }
@@ -65,13 +65,13 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
         <header className="flex items-center justify-between">
           <div className="flex flex-col">
             <h1 className="text-2xl text-white brand leading-none">
-              Blitz<span className="text-[#a2e634]">Games</span>
+              Blitz
             </h1>
             <span className="text-xs text-gray-500 mt-1">@{user.username}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 rounded-full bg-[#1a1a24] px-3.5 py-2 border border-[#2a2a3a]">
-              <span className="text-[#a2e634] font-bold text-sm tabular-nums">{fmt(user.balances?.blitz)}</span>
+              <span className="text-[#6E54FF] font-bold text-sm tabular-nums">{fmt(user.balances?.blitz)}</span>
               <span className="text-gray-500 text-xs">BLITZ</span>
             </div>
             <button
@@ -79,18 +79,18 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
               className="flex items-center gap-1.5 rounded-full bg-[#1a1a24] px-3 py-2 border border-[#2a2a3a] active:scale-95 transition-transform"
             >
               <span>🏆</span>
-              <span className="text-[#a2e634] font-semibold text-sm">{user.referrals}</span>
+              <span className="text-[#6E54FF] font-semibold text-sm">{user.referrals}</span>
             </button>
           </div>
         </header>
 
         {/* Invite card */}
-        <div className="rounded-2xl border border-[#a2e634]/25 bg-gradient-to-br from-[#a2e634]/[0.07] to-transparent p-4">
+        <div className="rounded-2xl border border-[#6E54FF]/25 bg-gradient-to-br from-[#6E54FF]/[0.07] to-transparent p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-0.5">
               <p className="text-sm font-bold text-white">Invite friends, top the leaderboard</p>
               <p className="text-xs text-gray-400">
-                Your code: <span className="text-[#a2e634] font-semibold">{user.refCode}</span>
+                Your code: <span className="text-[#6E54FF] font-semibold">{user.refCode}</span>
               </p>
             </div>
             <span className="text-2xl">🎯</span>
@@ -98,7 +98,7 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
           <div className="flex gap-2 mt-3">
             <button
               onClick={share}
-              className="flex-1 rounded-xl bg-[#a2e634] py-2.5 text-sm font-bold text-[#0a0a0f] active:scale-[0.98] transition-transform"
+              className="flex-1 rounded-xl bg-[#6E54FF] py-2.5 text-sm font-bold text-white active:scale-[0.98] transition-transform"
             >
               Share invite
             </button>
@@ -132,7 +132,7 @@ function GameHub({ user, onSelectGame, onOpenLeaderboard }: GameHubProps) {
                   hapticTap();
                   onSelectGame(game.id);
                 }}
-                className="relative mt-4 w-full rounded-xl bg-[#a2e634] py-2.5 text-sm font-bold text-[#0a0a0f] transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
+                className="relative mt-4 w-full rounded-xl bg-[#6E54FF] py-2.5 text-sm font-bold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
               >
                 Play
               </button>
