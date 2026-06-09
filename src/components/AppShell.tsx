@@ -62,7 +62,7 @@ function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink
 
       {/* drawer */}
       {drawer && (
-        <div className="fixed inset-0 z-40">
+        <div className="fixed inset-0 z-[60]">
           <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={() => setDrawer(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-[78%] max-w-[320px] bg-[#0a0a0f] border-r border-[#1a1a24] p-5 flex flex-col gap-1 animate-slide-left">
             <div className="flex items-center justify-between mb-3">
