@@ -49,6 +49,7 @@ function LaserParty({ onBack }: LaserPartyProps) {
 
   const reset = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
+    setLocked(false)
     setPhase('setup')
     setPlayerRow(-1)
     setPlayerCol(-1)
@@ -130,21 +131,26 @@ function LaserParty({ onBack }: LaserPartyProps) {
     }, 700)
   }, [])
 
+  const [locked, setLocked] = useState(false)
+
   const handleCellTap = useCallback((row: number, col: number) => {
-    if (isLasing || phase !== 'playing') return
+    if (isLasing || phase !== 'playing' || locked) return
 
     sfxTap()
+    setLocked(true)
     setPlayerRow(row)
     setPlayerCol(col)
     setLastSurvived(false)
 
     timerRef.current = setTimeout(() => {
       fireLaser(row, col, round, gridSize, destroyedRows, destroyedCols, multiplier)
+      setLocked(false)
     }, 500)
-  }, [isLasing, phase, destroyedRows, destroyedCols, round, gridSize, multiplier, fireLaser])
+  }, [isLasing, phase, locked, destroyedRows, destroyedCols, round, gridSize, multiplier, fireLaser])
 
   const handleSelectSize = useCallback((size: number) => {
     setGridSize(size)
+    setLocked(false)
     setPlayerRow(-1)
     setPlayerCol(-1)
     setDestroyedRows([])
