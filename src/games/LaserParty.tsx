@@ -313,6 +313,8 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
       return (
         <button
           key={`${rowIdx}-${colIdx}`}
+          // handleCellTap is an event handler; the compiler's ref check misreads its timerRef write as render-time access
+          // eslint-disable-next-line react-hooks/refs
           onClick={() => canTap && handleCellTap(rowIdx, colIdx)}
           disabled={!canTap}
           className={`absolute rounded-lg border ${
