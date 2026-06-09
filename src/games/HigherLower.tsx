@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { getRandomPair, categoryLabels } from '../data/entities'
+import { getEntityImage } from '../data/images'
 import { sfxCorrect, sfxWrong, sfxTap, sfxBust } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
 import { startChainGame, recordChainMove, endChainGame } from '../lib/chainGame'
@@ -136,7 +137,14 @@ function HigherLower({ onBack }: HigherLowerProps) {
               : 'none',
         }}
       >
-        <span className="text-5xl leading-none">{entity.emoji}</span>
+        {(() => {
+          const img = getEntityImage(entity.name, entity.category)
+          return img ? (
+            <img src={img} alt={entity.name} className="w-16 h-16 rounded-xl object-cover" loading="lazy" />
+          ) : (
+            <span className="text-5xl leading-none">{entity.emoji}</span>
+          )
+        })()}
         <span className="text-base font-bold text-white text-center leading-tight">{entity.name}</span>
         <span
           className="text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full"
