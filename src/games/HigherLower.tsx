@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { getRandomPair, getNextEntity, categoryLabels } from '../data/entities'
+import { getRandomPair, getNextEntity, comparisonLabel, categoryLabels } from '../data/entities'
 import { getEntityImage } from '../data/images'
 import { sfxCorrect, sfxWrong, sfxTap, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
@@ -64,8 +64,9 @@ function CardImage({ entity }: { entity: Entity }) {
 }
 
 function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
-  const [leftCard, setLeftCard] = useState<Entity>(() => getRandomPair(true)[0])
-  const [rightCard, setRightCard] = useState<Entity>(() => getRandomPair(true)[1])
+  const [initialPair] = useState<[Entity, Entity]>(() => getRandomPair())
+  const [leftCard, setLeftCard] = useState<Entity>(initialPair[0])
+  const [rightCard, setRightCard] = useState<Entity>(initialPair[1])
   const [phase, setPhase] = useState<Phase>('setup')
   const [wager, setWager] = useState(() => clampWager(WAGER_DEFAULT, blitzBalance))
   const [round, setRound] = useState(0)
@@ -76,7 +77,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
   const [txHash, setTxHash] = useState<string | null>(null)
 
   const beginBatch = useCallback(() => {
-    const [a, b] = getRandomPair(true)
+    const [a, b] = getRandomPair()
     setLeftCard(a)
     setRightCard(b)
     setRound(0)
@@ -273,7 +274,8 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
         </header>
 
         <div className="text-center mb-3">
-          <span className="text-xs text-[#6b7280]">Tap the higher value</span>
+          <span className="text-xs text-[#6b7280]">Tap the higher</span>
+          <div className="text-sm font-bold text-white mt-0.5">{comparisonLabel(leftCard)}</div>
         </div>
 
         <div className="flex gap-3 flex-1 items-stretch mb-4">
