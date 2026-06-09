@@ -112,3 +112,19 @@ body {
 .animate-shake { animation: shake 0.5s ease-in-out; }
 .animate-count-up { animation: countUp 0.3s ease-out forwards; }
 .animate-explode { animation: explode 0.4s ease-out forwards; }
+
+/* spinning loading ring (shown while an on-chain action is pending) */
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-ring {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(110, 84, 255, 0.25);
+  border-top-color: #6E54FF;
+  animation: spin 0.6s linear infinite;
+}
+
+/* toast slides down + fades out after it's validated */
+@keyframes toastOut { to { transform: translateY(24px); opacity: 0; } }
+.animate-toast-out { animation: toastOut 0.35s ease-in forwards; }
