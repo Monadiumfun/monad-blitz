@@ -1,27 +1,25 @@
 import { useState } from 'react'
 import GameHub from './components/GameHub'
+import Leaderboard from './components/Leaderboard'
 import HigherLower from './games/HigherLower'
 import LaserParty from './games/LaserParty'
 import DeathRun from './games/DeathRun'
 import type { GameId } from './types'
 
+type Screen = GameId | 'leaderboard' | null
+
 function App() {
-  const [currentGame, setCurrentGame] = useState<GameId | null>(null)
+  const [screen, setScreen] = useState<Screen>(null)
   const [balance] = useState(1.0)
 
-  if (currentGame === 'higher-lower') {
-    return <HigherLower onBack={() => setCurrentGame(null)} />
-  }
+  const goHome = () => setScreen(null)
 
-  if (currentGame === 'laser-party') {
-    return <LaserParty onBack={() => setCurrentGame(null)} />
-  }
+  if (screen === 'higher-lower') return <HigherLower onBack={goHome} />
+  if (screen === 'laser-party') return <LaserParty onBack={goHome} />
+  if (screen === 'death-run') return <DeathRun onBack={goHome} />
+  if (screen === 'leaderboard') return <Leaderboard onBack={goHome} />
 
-  if (currentGame === 'death-run') {
-    return <DeathRun onBack={() => setCurrentGame(null)} />
-  }
-
-  return <GameHub onSelectGame={setCurrentGame} balance={balance} />
+  return <GameHub onSelectGame={setScreen} balance={balance} />
 }
 
 export default App

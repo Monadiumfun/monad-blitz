@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { sfxTap, sfxCorrect, sfxBust, sfxCashout, sfxSuspense } from '../lib/sounds'
+import { addScore } from '../lib/leaderboard'
 
 interface DeathRunProps {
   onBack: () => void
@@ -80,6 +81,8 @@ function DeathRun({ onBack }: DeathRunProps) {
 
       if (mines[rowIndex] === tileIndex) {
         sfxBust()
+        const mult = cumulativeMultiplier(tilesPerRow, picks.length)
+        addScore('death-run', mult, `Row ${picks.length}`)
         setPicks(p => [...p, tileIndex])
         setGameState('bust')
         return
@@ -98,6 +101,7 @@ function DeathRun({ onBack }: DeathRunProps) {
   const handleCashOut = useCallback(() => {
     if (gameState === 'playing' && picks.length > 0) {
       sfxCashout()
+      addScore('death-run', multiplier, `Row ${picks.length}`)
       setGameState('cashout')
     }
   }, [gameState, picks.length])

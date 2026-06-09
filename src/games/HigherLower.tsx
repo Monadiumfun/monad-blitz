@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { getRandomPair, categoryLabels } from '../data/entities'
 import { sfxCorrect, sfxWrong, sfxTap, sfxBust } from '../lib/sounds'
+import { addScore } from '../lib/leaderboard'
 import type { Entity } from '../types'
 
 interface HigherLowerProps {
@@ -58,7 +59,11 @@ function HigherLower({ onBack }: HigherLowerProps) {
     } else {
       sfxWrong()
       setPhase('wrong')
-      setTimeout(() => { sfxBust(); setPhase('gameover') }, 1200)
+      setTimeout(() => {
+        sfxBust()
+        addScore('higher-lower', streak, `${streak} streak`)
+        setPhase('gameover')
+      }, 1200)
     }
   }, [phase, leftCard, rightCard])
 
