@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Script, console} from "forge-std/Script.sol";
-import {NadPaymaster} from "../src/NadPaymaster.sol";
+import {BlitzGamePaymaster} from "../src/BlitzGamePaymaster.sol";
 import {IEntryPoint} from "@account-abstraction/interfaces/IEntryPoint.sol";
 
 contract DeployPaymaster is Script {
@@ -13,13 +13,13 @@ contract DeployPaymaster is Script {
 
         vm.startBroadcast();
 
-        NadPaymaster paymaster = new NadPaymaster(
+        BlitzGamePaymaster paymaster = new BlitzGamePaymaster(
             IEntryPoint(entryPoint),
             owner,
             signer
         );
 
-        console.log("NadPaymaster deployed at:", address(paymaster));
+        console.log("BlitzGamePaymaster deployed at:", address(paymaster));
 
         vm.stopBroadcast();
     }
