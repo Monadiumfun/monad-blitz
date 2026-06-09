@@ -202,16 +202,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
         <div className="w-full max-w-[420px] flex flex-col gap-6">
-          <header className="flex items-center justify-between">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Back
-            </button>
+          <header className="flex items-center justify-center">
             <span className="text-sm font-bold text-[#e74c3c] tracking-wide uppercase">Laser Party</span>
           </header>
 
@@ -302,14 +293,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
       <div className="w-full max-w-[420px] mx-auto flex flex-col flex-1 px-3 py-4">
         <header className="flex items-center justify-between mb-2">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <div className="w-[60px]" />
           <div className="flex flex-col items-center">
             <span className="text-xs text-[#6b7280] uppercase tracking-wide">Round {round + 1}</span>
             <span className="text-2xl font-mono font-bold text-[#6E54FF]">{multiplier.toFixed(2)}x</span>
