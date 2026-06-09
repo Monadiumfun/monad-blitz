@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "concurrently -k -n vite,api -c green,cyan \"vite\" \"tsx --env-file=.env api/dev-server.mjs\"",
     "dev:api": "tsx --env-file=.env api/dev-server.mjs",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && tsc -p tsconfig.api.json && vite build",
+    "typecheck:api": "tsc -p tsconfig.api.json",
     "lint": "eslint .",
     "preview": "vite preview",
     "bot": "node --env-file=.env scripts/bot.mjs"

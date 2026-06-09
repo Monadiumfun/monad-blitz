@@ -50,11 +50,23 @@ function SharePnL({ game, emoji, multiplier, wager }: Props) {
     };
   }, [open, emoji, game, payout, multiplier, username, refCode, referralLink]);
 
-  // Share to Telegram only (same flow as the referral-code share): opens the
-  // Telegram share sheet with the win text + the referral link.
-  function share() {
+  // Share the rendered card as an IMAGE via the native share sheet (so the card
+  // actually gets attached); fall back to a Telegram link share if files aren't
+  // shareable (e.g. desktop).
+  async function share() {
     hapticTap();
     const text = `I just won ${fmt(payout)} $BLITZ on ${game} (${multiplier.toFixed(2)}×) 🎮\nPlay on Monad — use my code "${refCode}":`;
+    const canvas = canvasRef.current;
+    try {
+      const blob = canvas ? await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png")) : null;
+      const file = blob ? new File([blob], "blitz-win.png", { type: "image/png" }) : null;
+      if (file && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], text });
+        return;
+      }
+    } catch {
+      /* user cancelled or sharing unsupported — fall through */
+    }
     openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`);
   }
 
@@ -83,7 +95,7 @@ function SharePnL({ game, emoji, multiplier, wager }: Props) {
               onClick={share}
               className="flex-1 py-3 rounded-xl bg-[#6E54FF] text-white font-bold text-sm active:scale-[0.97] transition"
             >
-              Share on Telegram
+              Share
             </button>
             <button
               onClick={() => setOpen(false)}
