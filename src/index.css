@@ -13,7 +13,8 @@
   --color-text: #f0f0f0;
   --color-text-dim: #6b7280;
   --color-border: #2a2a3a;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Press Start 2P', system-ui, monospace;
+  --font-body: 'Inter', system-ui, sans-serif;
 }
 
 * {
@@ -25,9 +26,17 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.7;
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Press Start 2P is great for display but unreadable in long copy — opt those
+   paragraphs into Inter with .font-body. */
+.font-body {
+  font-family: var(--font-body);
 }
 
 #root {

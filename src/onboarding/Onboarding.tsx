@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { api, type ApiUser } from "../lib/api";
 import { haptic, hapticTap } from "../lib/telegram";
+
+const MonadGradientBackground = lazy(() => import("../components/MonadGradientBackground"));
 
 interface Props {
   firstName: string | null;
@@ -47,8 +49,11 @@ function Onboarding({ firstName, suggestedRef, onComplete }: Props) {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#0a0a0f] flex flex-col items-center px-5 py-8">
-      <div className="w-full max-w-[420px] flex flex-col flex-1">
+    <div className="min-h-[100dvh] flex flex-col items-center px-5 py-8">
+      <Suspense fallback={null}>
+        <MonadGradientBackground />
+      </Suspense>
+      <div className="relative z-10 w-full max-w-[420px] flex flex-col flex-1">
         <header className="text-center mb-8 mt-4">
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
             Blitz<span className="text-[#a2e634]">Games</span>
