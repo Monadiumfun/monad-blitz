@@ -1,4 +1,4 @@
-import { concatHex, custom, http, pad, toHex, type Address, type Hex } from "viem";
+import { concatHex, custom, http, pad, toHex, type Address, type Hex, type Log } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {
   entryPoint07Address,
@@ -239,14 +239,16 @@ export interface Call {
 export interface SponsoredReceipt {
   userOpHash: Hex;
   txHash: Hex;
-  logs: { address: Address; topics: Hex[]; data: Hex }[];
+  logs: Log[];
 }
 
 export function sendSponsored(telegramId: number, calls: Call[]): Promise<SponsoredReceipt> {
   return enqueueUser(telegramId, async () => {
     const client = await smartClient(telegramId);
     const userOpHash = await client.sendUserOperation({ calls });
-    const receipt = await client.waitForUserOperationReceipt({ hash: userOpHash, timeout: 60_000 });
+    // Monad blocks are sub-second; poll fast so we don't wait a full 4s (viem
+    // default) to notice an op that already landed.
+    const receipt = await client.waitForUserOperationReceipt({ hash: userOpHash, timeout: 60_000, pollingInterval: 300 });
     if (!receipt.success) throw new Error(`userOp reverted: ${userOpHash}`);
     return {
       userOpHash,

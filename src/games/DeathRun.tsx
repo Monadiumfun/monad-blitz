@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { sfxTap, sfxCorrect, sfxBust, sfxCashout, sfxSuspense } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
-import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
+import { startChainGame, endChainGame, fetchOutcome } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
 import SharePnL from '../components/SharePnL'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
@@ -17,7 +17,7 @@ type TilesPerRow = 2 | 3 | 4
 
 const FEE_FACTOR = 0.96
 const PREVIEW_ROWS = 3
-const SUSPENSE_MS = 650
+const SUSPENSE_MS = 300
 
 function rowMultiplier(tilesPerRow: TilesPerRow): number {
   return (1 / (1 - 1 / tilesPerRow)) * FEE_FACTOR
@@ -89,7 +89,6 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
 
     sfxTap()
     sfxSuspense()
-    recordChainMove(0, picks.length + 1)
     setSuspenseTile(tileIndex)
     setGameState('suspense')
 

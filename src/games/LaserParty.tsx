@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from 'react'
 import { sfxTap, sfxCorrect, sfxLaser, sfxBust, sfxCashout } from '../lib/sounds'
 import { addScore } from '../lib/leaderboard'
-import { startChainGame, recordChainMove, endChainGame, fetchOutcome } from '../lib/chainGame'
+import { startChainGame, endChainGame, fetchOutcome } from '../lib/chainGame'
 import BetSelector from '../components/BetSelector'
 import SharePnL from '../components/SharePnL'
 import { WAGER_DEFAULT, WAGER_MIN, clampWager, maxAffordable } from '../lib/wager'
@@ -22,6 +22,8 @@ const GRID_OPTIONS = [
 const HOUSE_EDGE = 0.96
 const MAX_GRID_PX = 340
 const GAP = 4
+const TAP_LOCK_MS = 180
+const LASER_MS = 350
 
 function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
   const [phase, setPhase] = useState<Phase>('setup')
@@ -39,6 +41,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
   const [lastSurvived, setLastSurvived] = useState(false)
   const [chainStatus, setChainStatus] = useState<'idle' | 'starting' | 'live' | 'settling' | 'settled' | 'error'>('idle')
   const [txHash, setTxHash] = useState<string | null>(null)
+  const [locked, setLocked] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const settleOnChain = useCallback((score: number, mult: number) => {
@@ -153,18 +156,15 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
             setPhase('cashout')
           }
         }
-      }, 700)
+      }, LASER_MS)
     })
   }, [settleOnChain])
-
-  const [locked, setLocked] = useState(false)
 
   const handleCellTap = useCallback((row: number, col: number) => {
     if (isLasing || phase !== 'playing' || locked) return
 
     sfxTap()
     setLocked(true)
-    recordChainMove(0, round + 1)
     setPlayerRow(row)
     setPlayerCol(col)
     setLastSurvived(false)
@@ -172,7 +172,7 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
     timerRef.current = setTimeout(() => {
       fireLaser(row, col, round, gridSize, destroyedRows, destroyedCols, multiplier)
       setLocked(false)
-    }, 500)
+    }, TAP_LOCK_MS)
   }, [isLasing, phase, locked, destroyedRows, destroyedCols, round, gridSize, multiplier, fireLaser])
 
   const handleSelectSize = useCallback((size: number) => {
@@ -298,6 +298,95 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
   const gridW = aliveCols.length * cellSize + (aliveCols.length - 1) * GAP
   const gridH = aliveRows.length * cellSize + (aliveRows.length - 1) * GAP
 
+  const gridCells = aliveRows.map((rowIdx, ri) =>
+    aliveCols.map((colIdx, ci) => {
+      const isPlayer = rowIdx === playerRow && colIdx === playerCol
+      const isBeingLased =
+        laserDim !== null &&
+        ((laserDim === 'row' && laserIndex === rowIdx) ||
+          (laserDim === 'col' && laserIndex === colIdx))
+      const canTap = !isLasing && phase === 'playing'
+
+      const x = ci * (cellSize + GAP)
+      const y = ri * (cellSize + GAP)
+
+      return (
+        <button
+          key={`${rowIdx}-${colIdx}`}
+          onClick={() => canTap && handleCellTap(rowIdx, colIdx)}
+          disabled={!canTap}
+          className={`absolute rounded-lg border ${
+            canTap ? 'cursor-pointer hover:brightness-150 active:scale-90' : 'cursor-default'
+          } ${isBeingLased ? 'animate-shake' : ''}`}
+          style={{
+            width: cellSize,
+            height: cellSize,
+            left: x,
+            top: y,
+            transition: 'left 0.5s ease, top 0.5s ease, width 0.5s ease, height 0.5s ease, background-color 0.2s, border-color 0.2s, box-shadow 0.2s',
+            backgroundColor: isBeingLased
+              ? '#e74c3c60'
+              : isPlayer
+                ? '#6E54FF30'
+                : '#1a1a2e',
+            borderColor: isBeingLased
+              ? '#e74c3c'
+              : isPlayer
+                ? '#6E54FF'
+                : '#2a2a3a',
+            boxShadow: isPlayer && !isBeingLased
+              ? '0 0 14px rgba(110, 84, 255, 0.4)'
+              : isBeingLased
+                ? '0 0 12px rgba(231, 76, 60, 0.4)'
+                : 'none',
+          }}
+        >
+          {isPlayer && (
+            <div className="w-full h-full flex items-center justify-center">
+              <div
+                className="rounded-full bg-[#6E54FF]"
+                style={{
+                  width: cellSize * 0.35,
+                  height: cellSize * 0.35,
+                  transition: 'width 0.5s ease, height 0.5s ease',
+                }}
+              />
+            </div>
+          )}
+        </button>
+      )
+    }),
+  )
+
+  const laserRi = aliveRows.indexOf(laserIndex)
+  const laserCi = aliveCols.indexOf(laserIndex)
+  const showLaser =
+    laserDim !== null &&
+    !(laserDim === 'row' && laserRi < 0) &&
+    !(laserDim === 'col' && laserCi < 0)
+  const laserBeam = showLaser ? (
+    <div
+      style={{
+        position: 'absolute',
+        top: laserDim === 'row' ? laserRi * (cellSize + GAP) : 0,
+        left: laserDim === 'col' ? laserCi * (cellSize + GAP) : 0,
+        width: laserDim === 'row' ? gridW : cellSize,
+        height: laserDim === 'col' ? gridH : cellSize,
+        background: laserDim === 'row'
+          ? 'linear-gradient(90deg, transparent, #e74c3c, #ff6b35, #e74c3c, transparent)'
+          : 'linear-gradient(180deg, transparent, #e74c3c, #ff6b35, #e74c3c, transparent)',
+        borderRadius: 6,
+        opacity: 0.7,
+        filter: 'blur(6px)',
+        pointerEvents: 'none',
+        transformOrigin: laserDim === 'row' ? 'left center' : 'center top',
+        animation: laserDim === 'row'
+          ? `laser-h ${LASER_MS}ms ease-out forwards`
+          : `laser-v ${LASER_MS}ms ease-out forwards`,
+      }}
+    />
+  ) : null
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
       <div className="w-full max-w-[420px] mx-auto flex flex-col flex-1 px-3 py-4">
@@ -354,95 +443,8 @@ function LaserParty({ onBack, blitzBalance }: LaserPartyProps) {
               transition: 'width 0.5s ease, height 0.5s ease',
             }}
           >
-            {aliveRows.map((rowIdx, ri) =>
-              aliveCols.map((colIdx, ci) => {
-                const isPlayer = rowIdx === playerRow && colIdx === playerCol
-                const isBeingLased =
-                  laserDim !== null &&
-                  ((laserDim === 'row' && laserIndex === rowIdx) ||
-                    (laserDim === 'col' && laserIndex === colIdx))
-                const canTap = !isLasing && phase === 'playing'
-
-                const x = ci * (cellSize + GAP)
-                const y = ri * (cellSize + GAP)
-
-                return (
-                  <button
-                    key={`${rowIdx}-${colIdx}`}
-                    onClick={() => canTap && handleCellTap(rowIdx, colIdx)}
-                    disabled={!canTap}
-                    className={`absolute rounded-lg border ${
-                      canTap ? 'cursor-pointer hover:brightness-150 active:scale-90' : 'cursor-default'
-                    } ${isBeingLased ? 'animate-shake' : ''}`}
-                    style={{
-                      width: cellSize,
-                      height: cellSize,
-                      left: x,
-                      top: y,
-                      transition: 'left 0.5s ease, top 0.5s ease, width 0.5s ease, height 0.5s ease, background-color 0.2s, border-color 0.2s, box-shadow 0.2s',
-                      backgroundColor: isBeingLased
-                        ? '#e74c3c60'
-                        : isPlayer
-                          ? '#6E54FF30'
-                          : '#1a1a2e',
-                      borderColor: isBeingLased
-                        ? '#e74c3c'
-                        : isPlayer
-                          ? '#6E54FF'
-                          : '#2a2a3a',
-                      boxShadow: isPlayer && !isBeingLased
-                        ? '0 0 14px rgba(110, 84, 255, 0.4)'
-                        : isBeingLased
-                          ? '0 0 12px rgba(231, 76, 60, 0.4)'
-                          : 'none',
-                    }}
-                  >
-                    {isPlayer && (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div
-                          className="rounded-full bg-[#6E54FF]"
-                          style={{
-                            width: cellSize * 0.35,
-                            height: cellSize * 0.35,
-                            transition: 'width 0.5s ease, height 0.5s ease',
-                          }}
-                        />
-                      </div>
-                    )}
-                  </button>
-                )
-              }),
-            )}
-
-            {laserDim !== null && (() => {
-              const ri = aliveRows.indexOf(laserIndex)
-              const ci = aliveCols.indexOf(laserIndex)
-              if (laserDim === 'row' && ri < 0) return null
-              if (laserDim === 'col' && ci < 0) return null
-
-              return (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: laserDim === 'row' ? ri * (cellSize + GAP) : 0,
-                    left: laserDim === 'col' ? ci * (cellSize + GAP) : 0,
-                    width: laserDim === 'row' ? gridW : cellSize,
-                    height: laserDim === 'col' ? gridH : cellSize,
-                    background: laserDim === 'row'
-                      ? 'linear-gradient(90deg, transparent, #e74c3c, #ff6b35, #e74c3c, transparent)'
-                      : 'linear-gradient(180deg, transparent, #e74c3c, #ff6b35, #e74c3c, transparent)',
-                    borderRadius: 6,
-                    opacity: 0.7,
-                    filter: 'blur(6px)',
-                    pointerEvents: 'none' as const,
-                    transformOrigin: laserDim === 'row' ? 'left center' : 'center top',
-                    animation: laserDim === 'row'
-                      ? 'laser-h 0.7s ease-out forwards'
-                      : 'laser-v 0.7s ease-out forwards',
-                  }}
-                />
-              )
-            })()}
+            {gridCells}
+            {laserBeam}
           </div>
         </div>
 
