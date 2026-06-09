@@ -18,12 +18,20 @@ interface Props {
   onSelectGame: (g: GameId) => void;
   refCode: string;
   referralLink: string;
+  blitzBalance: number;
   drawer: boolean;
   setDrawer: (v: boolean) => void;
   children: ReactNode;
 }
 
-function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, drawer, setDrawer, children }: Props) {
+function fmtBlitz(n: number): string {
+  const v = Math.max(0, Math.floor(n));
+  return v >= 100_000
+    ? Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(v)
+    : v.toLocaleString("en");
+}
+
+function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink, blitzBalance, drawer, setDrawer, children }: Props) {
 
   function shareRef() {
     hapticTap();
@@ -42,9 +50,15 @@ function AppShell({ tab, onTab, currentGame, onSelectGame, refCode, referralLink
           <BlitzLogo className="h-[0.9em] w-auto text-[#6E54FF]" style={{ filter: "drop-shadow(0 0 6px rgba(110,84,255,0.6))" }} />
           Blitz
         </span>
-        <button onClick={shareRef} aria-label="Invite" className="p-1.5 -mr-1.5 text-[#8898a8] active:scale-90 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 13c2.2 0 4 1.8 4 4v2M2 19v-2c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4v2M9 9a3 3 0 100-6 3 3 0 000 6zm9-1a2.5 2.5 0 100-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
+        <div className="flex items-center gap-2 -mr-1.5">
+          <div className="flex items-center gap-1 rounded-full border border-[#6E54FF40] bg-[#6E54FF1a] px-2.5 py-1" aria-label="BLITZ balance">
+            <BlitzLogo className="h-3 w-auto text-[#6E54FF]" />
+            <span className="text-xs font-bold tabular-nums text-white">{fmtBlitz(blitzBalance)}</span>
+          </div>
+          <button onClick={shareRef} aria-label="Invite" className="p-1.5 text-[#8898a8] active:scale-90 transition">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 13c2.2 0 4 1.8 4 4v2M2 19v-2c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4v2M9 9a3 3 0 100-6 3 3 0 000 6zm9-1a2.5 2.5 0 100-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+        </div>
       </header>
 
       {/* content */}
