@@ -198,17 +198,6 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
         <div className="w-full max-w-[420px] flex flex-col gap-6 animate-fade-in">
-          <header className="flex items-center">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Back
-            </button>
-          </header>
 
           <div className="text-center">
             <span className="text-4xl mb-3 block">🔥</span>
@@ -256,14 +245,7 @@ function HigherLower({ onBack, blitzBalance }: HigherLowerProps) {
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
       <div className="w-full max-w-[420px] mx-auto flex flex-col flex-1 px-3 py-4">
         <header className="flex items-center justify-between mb-3">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <div className="w-6" />
           <div className="flex flex-col items-center">
             <span className="text-[10px] text-[#6b7280] uppercase tracking-wide">
               Pick {Math.min(round + 1, BATCH_SIZE)}/{BATCH_SIZE}

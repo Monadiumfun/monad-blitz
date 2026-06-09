@@ -149,17 +149,6 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
         <div className="w-full max-w-[420px] flex flex-col gap-6 animate-fade-in">
-          <header className="flex items-center">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Back
-            </button>
-          </header>
 
           <div className="text-center">
             <span className="text-4xl mb-3 block">💀</span>
@@ -203,14 +192,7 @@ function DeathRun({ onBack, blitzBalance }: DeathRunProps) {
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center px-3 py-4">
       <div className="w-full max-w-[420px] flex flex-col gap-3">
         <header className="flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-white transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <div className="w-6" />
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#6b7280]">
               Row <span className="text-white font-bold">{picks.length + 1}</span>
