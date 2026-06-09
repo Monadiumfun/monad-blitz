@@ -7,8 +7,8 @@ interface Props {
   onBack: () => void;
 }
 
-// Block explorer for Monad testnet. Swap this base if you use a different one.
-const EXPLORER = "https://monad.socialscan.io";
+// Block explorer for Monad testnet (same one the chain feed links to).
+const EXPLORER = "https://testnet.monadexplorer.com";
 const explorerAddress = (addr: string) => `${EXPLORER}/address/${addr}`;
 
 function short(addr: string): string {
@@ -83,7 +83,7 @@ function Settings({ user, onBack }: Props) {
                 }}
                 className="mt-1 w-full rounded-xl bg-[#6E54FF] py-2.5 text-sm font-bold text-white active:scale-[0.98] transition"
               >
-                View transactions on explorer ↗
+                Transaction history ↗
               </button>
             </>
           ) : (
