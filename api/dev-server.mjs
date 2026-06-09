@@ -12,6 +12,7 @@ const PORT = Number(process.env.API_PORT || 3001);
 
 const routes = {
   "/api/me": () => import("./me.ts"),
+  "/api/balance": () => import("./balance.ts"),
   "/api/register": () => import("./register.ts"),
   "/api/leaderboard": () => import("./leaderboard.ts"),
   "/api/score": () => import("./score.ts"),

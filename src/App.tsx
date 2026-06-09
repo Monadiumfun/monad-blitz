@@ -40,6 +40,25 @@ function App() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Keep the balance live: poll the lightweight /api/balance while a user is
+  // active (the fast RPC pool makes this cheap), so wins/funding show quickly.
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    const tick = () =>
+      api
+        .balance()
+        .then((r) => {
+          if (alive) setUser((u) => (u ? { ...u, balances: r.balances } : u));
+        })
+        .catch(() => {});
+    const id = setInterval(tick, 5000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [user?.telegramId]);
+
   // Return to the hub and refresh the referral count.
   function backToHub() {
     setScreen({ name: "hub" });

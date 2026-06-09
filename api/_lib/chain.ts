@@ -2,6 +2,7 @@ import {
   createPublicClient,
   createWalletClient,
   http,
+  fallback,
   parseEther,
   formatEther,
   defineChain,
@@ -9,11 +10,37 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
+// Fast, rate-limit-resilient RPC pool. The fastest healthy endpoint is used
+// (rank: true), failing over automatically — so balance reads etc. stay snappy
+// without hammering a single provider into a rate limit. Override / extend via
+// MONAD_RPC_URLS (comma-separated). MONAD_RPC_URL stays supported as primary.
+const RPC_URLS = (
+  process.env.MONAD_RPC_URLS ||
+  [
+    process.env.MONAD_RPC_URL || "https://rpc.ankr.com/monad_testnet",
+    "https://monad-testnet.drpc.org",
+    "https://rpc-testnet.monadinfra.com",
+    "https://monad-testnet.gateway.tatum.io",
+    "https://testnet-rpc.monad.xyz",
+  ].join(",")
+)
+  .split(",")
+  .map((u) => u.trim())
+  .filter(Boolean);
+
+// Always prefer the first URL (Ankr) and fail over to the next on error / rate
+// limit. No `rank` — its background timer isn't serverless-friendly, and order
+// keeps Ankr as the primary as requested.
+const rpcTransport = fallback(
+  RPC_URLS.map((url) => http(url)),
+  { retryCount: 2 },
+);
+
 export const monadTestnet = defineChain({
   id: Number(process.env.MONAD_CHAIN_ID || 10143),
   name: "Monad Testnet",
   nativeCurrency: { name: "Monad", symbol: "MON", decimals: 18 },
-  rpcUrls: { default: { http: [process.env.MONAD_RPC_URL || "https://testnet-rpc.monad.xyz"] } },
+  rpcUrls: { default: { http: RPC_URLS } },
 });
 
 export const BLITZ_ADDRESS = (process.env.TOKEN_ADDRESS || "") as Hex;
@@ -24,7 +51,7 @@ export const BLITZ_ABI = [
   { type: "function", name: "transfer", stateMutability: "nonpayable", inputs: [{ name: "to", type: "address" }, { name: "value", type: "uint256" }], outputs: [{ type: "bool" }] },
 ] as const;
 
-export const publicClient = createPublicClient({ chain: monadTestnet, transport: http() });
+export const publicClient = createPublicClient({ chain: monadTestnet, transport: rpcTransport });
 
 function deployer() {
   const pk = process.env.DEPLOYER_PRIVATE_KEY as Hex;
@@ -33,7 +60,7 @@ function deployer() {
 }
 
 export function deployerWalletClient() {
-  return createWalletClient({ account: deployer(), chain: monadTestnet, transport: http() });
+  return createWalletClient({ account: deployer(), chain: monadTestnet, transport: rpcTransport });
 }
 
 // Monad testnet RPC is load-balanced and eventually-consistent: firing several
