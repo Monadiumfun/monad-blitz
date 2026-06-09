@@ -13,6 +13,10 @@ const routes = {
   "/api/register": () => import("./register.ts"),
   "/api/leaderboard": () => import("./leaderboard.ts"),
   "/api/score": () => import("./score.ts"),
+  "/api/game-start": () => import("./game-start.ts"),
+  "/api/game-move": () => import("./game-move.ts"),
+  "/api/game-end": () => import("./game-end.ts"),
+  "/api/vote": () => import("./vote.ts"),
 };
 
 const server = createServer(async (req, res) => {
