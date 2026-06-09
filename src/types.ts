@@ -2,7 +2,7 @@ export type GameId = 'higher-lower' | 'laser-party' | 'death-run'
 
 export interface Entity {
   name: string
-  category: 'crypto' | 'culture' | 'geo' | 'monad' | 'sports' | 'tech' | 'food'
+  category: 'crypto' | 'culture' | 'geo' | 'monad' | 'sports' | 'tech' | 'food' | 'spicy'
   metric: string
   metricLabel: string
   value: number
