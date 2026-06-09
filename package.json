@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n vite,api -c green,cyan \"vite\" \"node --env-file=.env api/dev-server.mjs\"",
-    "dev:api": "node --env-file=.env api/dev-server.mjs",
+    "dev": "concurrently -k -n vite,api -c green,cyan \"vite\" \"tsx --env-file=.env api/dev-server.mjs\"",
+    "dev:api": "tsx --env-file=.env api/dev-server.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -31,6 +31,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "tsx": "^4.22.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12"
