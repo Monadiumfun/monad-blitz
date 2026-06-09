@@ -35,15 +35,20 @@ export default async function handler(req: Req, res: Res) {
   const row = await getActiveGame(user.telegram_id, gameId);
   if (!row) return sendJson(res, 404, { error: "game_not_active" });
   if (row.busted) return sendJson(res, 409, { error: "already_busted" });
-  // Strict sequencing: outcomes are only served for the current step, so a
-  // client can never peek at future mines/lasers.
-  if (index !== row.progress) return sendJson(res, 409, { error: "out_of_sequence", expected: row.progress });
 
   const serverSeed = row.seed as Hex;
-  const config = JSON.parse(row.config || "{}") as { tiles?: number; grid?: number };
+  const config = JSON.parse(row.config || "{}") as { tiles?: number; grid?: number; tilesSeq?: number[] };
 
   if (row.game === "death-run") {
-    const tiles = config.tiles ?? 2;
+    // Rows have varying tile counts; the player climbs them in any (shuffled)
+    // order. `index` is the canonical ROW ID, and each row's mine is keyed on
+    // that id — so order can't leak future mines. `progress` is a played-rows
+    // bitmask (no strict step sequencing).
+    const seq = config.tilesSeq && config.tilesSeq.length ? config.tilesSeq : [config.tiles ?? 2];
+    if (index >= seq.length) return sendJson(res, 400, { error: "invalid_row" });
+    const playedMask = row.progress;
+    if ((playedMask >> index) & 1) return sendJson(res, 409, { error: "row_already_played" });
+    const tiles = seq[index];
     const pick = Math.floor(Number(body.pick));
     if (!Number.isInteger(pick) || pick < 0 || pick >= tiles) {
       return sendJson(res, 400, { error: "invalid_pick" });
@@ -54,7 +59,7 @@ export default async function handler(req: Req, res: Res) {
     await advanceGame({
       telegramId: user.telegram_id,
       onchainId: gameId,
-      progress: index + 1,
+      progress: hit ? playedMask : playedMask | (1 << index),
       mult,
       busted: hit,
     });
@@ -62,6 +67,8 @@ export default async function handler(req: Req, res: Res) {
   }
 
   if (row.game === "laser-party") {
+    // strict step sequencing for laser (no shuffle) — can't peek future lasers
+    if (index !== row.progress) return sendJson(res, 409, { error: "out_of_sequence", expected: row.progress });
     const grid = config.grid ?? 5;
     const pick = (body.pick ?? {}) as { row?: number; col?: number };
     const pRow = Math.floor(Number(pick.row));

@@ -79,7 +79,7 @@ export const api = {
     game: string,
     wager?: number,
     clientSeed?: string,
-    config?: { tiles?: number; grid?: number },
+    config?: { tiles?: number; grid?: number; tilesSeq?: number[] },
   ) =>
     request<{ gameId: number; txHash: string }>("/api/game-start", {
       method: "POST",
