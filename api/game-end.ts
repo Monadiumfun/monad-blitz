@@ -1,8 +1,8 @@
 import { formatEther, type Hex } from "viem";
-import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { getActiveGame, getUser, initSchema, settleGame, submitScore } from "./_lib/db.ts";
-import { sendSponsored, smartAccountAddress } from "./_lib/aa.ts";
-import { buildCashoutCall, parseCashedOut, MAX_MULTIPLIER_BPS } from "./_lib/nadgames.ts";
+import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http";
+import { getActiveGame, getUser, initSchema, settleGame, submitScore } from "./_lib/db";
+import { sendSponsored, smartAccountAddress } from "./_lib/aa";
+import { buildCashoutCall, parseCashedOut, MAX_MULTIPLIER_BPS } from "./_lib/nadgames";
 
 export default async function handler(req: Req, res: Res) {
   applyCors(res);

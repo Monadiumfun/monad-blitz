@@ -1,5 +1,5 @@
-import { applyCors, authenticate, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { initSchema, leaderboard } from "./_lib/db.ts";
+import { applyCors, authenticate, sendJson, type Req, type Res } from "./_lib/http";
+import { initSchema, leaderboard } from "./_lib/db";
 
 export default async function handler(req: Req, res: Res) {
   applyCors(res);

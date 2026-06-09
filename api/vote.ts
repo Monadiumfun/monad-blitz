@@ -1,8 +1,8 @@
 import { keccak256, toBytes, encodeFunctionData, type Hex, type Address } from "viem";
-import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { initSchema, getUser } from "./_lib/db.ts";
-import { sendSponsored } from "./_lib/aa.ts";
-import { publicClient } from "./_lib/chain.ts";
+import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http";
+import { initSchema, getUser } from "./_lib/db";
+import { sendSponsored } from "./_lib/aa";
+import { publicClient } from "./_lib/chain";
 
 const VOTES_ADDRESS = (process.env.BLITZ_VOTES_ADDRESS || "0x30d47E1986f2Ec086604d96f5D44a30a83A4CCE3") as Address;
 

@@ -8,8 +8,8 @@ import {
 import { createSmartAccountClient, type SmartAccountClient } from "permissionless";
 import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
-import { monadTestnet, publicClient } from "./chain.ts";
-import { deriveUserKey } from "./wallet.ts";
+import { monadTestnet, publicClient } from "./chain";
+import { deriveUserKey } from "./wallet";
 
 export const PAYMASTER_ADDRESS = (process.env.PAYMASTER_ADDRESS || "") as Address;
 const BUNDLER_RPC_URL = process.env.BUNDLER_RPC_URL || "https://public.pimlico.io/v2/10143/rpc";

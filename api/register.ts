@@ -1,7 +1,7 @@
-import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http.ts";
-import { createUser, getUser, initSchema, isUsernameTaken, markFunded, resolveReferrer, setWallet } from "./_lib/db.ts";
-import { smartAccountAddress } from "./_lib/aa.ts";
-import { fundNewUser } from "./_lib/chain.ts";
+import { applyCors, authenticate, readJson, sendJson, type Req, type Res } from "./_lib/http";
+import { createUser, getUser, initSchema, isUsernameTaken, markFunded, resolveReferrer, setWallet } from "./_lib/db";
+import { smartAccountAddress } from "./_lib/aa";
+import { fundNewUser } from "./_lib/chain";
 import type { Hex } from "viem";
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
