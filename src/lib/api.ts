@@ -63,6 +63,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   me: () => request<MeResponse>("/api/me"),
+  balance: () => request<{ walletAddress: string; balances: { mon: string; blitz: string } }>("/api/balance"),
   register: (username: string, refCode?: string) =>
     request<{ user: ApiUser }>("/api/register", {
       method: "POST",
