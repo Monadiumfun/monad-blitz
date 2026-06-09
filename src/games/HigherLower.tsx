@@ -32,15 +32,31 @@ const categoryColors: Record<string, string> = {
   spicy: '#ff2d55',
 }
 
+const LOGO_CATEGORIES = new Set(['crypto', 'monad', 'tech', 'food', 'geo'])
+
 function CardImage({ entity }: { entity: Entity }) {
   const [failed, setFailed] = useState(false)
   const img = entity.image ?? getEntityImage(entity.name, entity.category)
-  if (!img || failed) return <span className="text-5xl leading-none">{entity.emoji}</span>
+  if (!img || failed) return <span className="text-7xl leading-none">{entity.emoji}</span>
+  const isLogo = LOGO_CATEGORIES.has(entity.category) || entity.metric === 'club_instagram'
+  if (isLogo) {
+    return (
+      <span className="w-32 h-32 rounded-xl bg-white flex items-center justify-center p-3">
+        <img
+          src={img}
+          alt={entity.name}
+          className="max-w-full max-h-full object-contain"
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
+      </span>
+    )
+  }
   return (
     <img
       src={img}
       alt={entity.name}
-      className="w-16 h-16 rounded-xl object-cover"
+      className="w-32 h-32 rounded-xl object-cover"
       loading="lazy"
       onError={() => setFailed(true)}
     />
